@@ -1,0 +1,7 @@
+C:\maven\apache-maven-3.9.6\bin\mvn archetype:generate -DarchetypeGroupId=org.glassfish.jersey.archetypes -DarchetypeArtifactId=jersey-quickstart-grizzly2 -DarchetypeVersion=3.1.5
+C:\maven\apache-maven-3.9.6\bin\mvn clean test
+C:\maven\apache-maven-3.9.6\bin\mvn exec:java
+C:\maven\apache-maven-3.9.6\bin\mvn package
+
+docker build -t bitnet/ws-rest-api:1.0.0 .
+docker run -p 9090:8080 -t -i --network bitnet-network --name WS-REST-API --restart=always --env TZ=America/Guatemala bitnet/ws-rest-api:1.0.0
