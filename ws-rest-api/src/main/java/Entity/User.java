@@ -20,7 +20,7 @@ public class User implements Serializable {
     private String PASSWORD;
     private String USERNAME;
     private String EMAIL;
-    private Integer ID_ROLE;
+    private Role ROLE;
     private Integer STATUS;
-    
+
 }
