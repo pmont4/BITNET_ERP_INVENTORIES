@@ -1,0 +1,22 @@
+version: '3.9'
+
+services:
+  WS-REST-API:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: WS-REST-API
+    image: bitnet/ws-rest-api:1.0.0
+    ports:
+      - "9090:8080"
+    restart: always
+    stdin_open: true
+    tty: true
+    environment:
+      TZ: "America/Guatemala"
+    networks:
+      - bitnet-network
+
+networks:
+  bitnet-network:
+    external: true

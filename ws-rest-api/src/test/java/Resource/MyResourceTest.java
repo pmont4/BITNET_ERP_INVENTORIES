@@ -43,6 +43,6 @@ public class MyResourceTest {
     @Test
     public void testGetIt() {
         String responseMsg = target.path("bitnet").request().get(String.class);
-        assertEquals("Got it!", responseMsg);
+        assertEquals("Hello world!", responseMsg);
     }
 }
