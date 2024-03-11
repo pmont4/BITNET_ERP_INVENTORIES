@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Optional;
 
 import RestAPI.Entity.User;
+import RestAPI.Util.MySQLDriver;
 
 public class UserController implements Serializable {
 
@@ -20,8 +21,8 @@ public class UserController implements Serializable {
         Connection connection = null;
 
         try {
-            DatabaseController databaseController = new DatabaseController();
-            connection = databaseController.getConnection();
+            MySQLDriver mySQLDriver = new MySQLDriver();
+            connection = mySQLDriver.getConnection();
             connection.setAutoCommit(false);
 
             String sql = "SELECT U.ID_USER, U.LOGIN_NAME, U.PASSWORD, U.USERNAME, U.EMAIL, U.ID_ROLE, " + 

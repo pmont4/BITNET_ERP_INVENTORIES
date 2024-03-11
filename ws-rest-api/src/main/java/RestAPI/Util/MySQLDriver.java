@@ -1,13 +1,13 @@
-package RestAPI.Controller;
+package RestAPI.Util;
 
 import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.DriverManager;
 
-public class DatabaseController implements Serializable {
-
-    private static final long serialVersionUID = 1L;
+public class MySQLDriver implements Serializable {
     
+    private static final long serialVersionUID = 1L;
+
     public synchronized Connection getConnection() {
         Connection result;
         
@@ -26,5 +26,5 @@ public class DatabaseController implements Serializable {
 
         return result;
     }
-    
+
 }
