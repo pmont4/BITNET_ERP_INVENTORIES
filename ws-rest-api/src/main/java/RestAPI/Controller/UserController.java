@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import RestAPI.Entity.User;
 
@@ -23,7 +24,12 @@ public class UserController implements Serializable {
             connection = databaseController.getConnection();
             connection.setAutoCommit(false);
 
-            String sql = "SELECT U.ID_USER, U.LOGIN_NAME, U.PASSWORD, U.USERNAME, U.EMAIL, U.ID_ROLE, U.STATUS FROM USER U";
+            String sql = "SELECT U.ID_USER, U.LOGIN_NAME, U.PASSWORD, U.USERNAME, U.EMAIL, U.ID_ROLE, " + 
+                        "CASE " +
+                        "WHEN U.STATUS = 1 THEN 'ONLINE'" +
+                        "ELSE 'OFFLINE'" +
+                        "END " +
+                        "FROM USER U";
 
             Statement stmt = connection.createStatement();
             ResultSet rs = stmt.executeQuery(sql);
@@ -36,9 +42,10 @@ public class UserController implements Serializable {
                 user.setUSERNAME(rs.getString(4));
                 user.setEMAIL(rs.getString(5));
                 user.setROLE(null);
-                user.setSTATUS(rs.getInt(7));
+                user.setSTATUS(rs.getString(7));
                 result.add(user);
             }
+
             rs.close();
             stmt.close();
 
@@ -67,6 +74,10 @@ public class UserController implements Serializable {
         }
 
         return result;
+    }
+
+    public Optional<User> getUser(Integer id) {
+        return this.getAllUsers().stream().filter(u -> u.getID_USER() == Long.parseLong(String.valueOf(id))).findFirst();
     }
     
 }
