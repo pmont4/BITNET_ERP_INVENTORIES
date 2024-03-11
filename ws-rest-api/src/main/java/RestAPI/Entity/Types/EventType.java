@@ -1,27 +1,23 @@
-package Entity;
+package RestAPI.Entity.Types;
 
 import java.io.Serializable;
 
-import Entity.Types.MenuType;
-import jakarta.annotation.Nullable;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
 @NoArgsConstructor
+@AllArgsConstructor
 @Getter
 @Setter
 @ToString
-public class Menu implements Serializable {
-    
+public class EventType implements Serializable {
+
     private static final long serialVersionUID = 1L;
 
-    private Integer ID_MENU;
+    private Integer ID_EVENT_TYPE;
     private String NAME;
-    private MenuType MENU_TYPE;
-
-    @Nullable
-    private Menu PARENT_MENU;
 
 }

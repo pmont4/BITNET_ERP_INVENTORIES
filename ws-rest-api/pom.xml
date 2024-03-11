@@ -38,6 +38,12 @@
         </dependency>
         -->
         <dependency>
+            <groupId>org.glassfish.jersey.media</groupId>
+            <artifactId>jersey-media-json-jackson</artifactId>
+            <version>3.1.5</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
             <version>${junit-jupiter.version}</version>
@@ -48,6 +54,12 @@
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>1.18.30</version>
+        </dependency>
+
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>8.0.33</version>
         </dependency>
     </dependencies>
 
@@ -82,7 +94,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <mainClass>Resource.Main</mainClass>
+                    <mainClass>RestAPI.Main</mainClass>
                 </configuration>
             </plugin>
             <plugin>

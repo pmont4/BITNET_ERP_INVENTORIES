@@ -1,25 +1,23 @@
-package Entity;
+package RestAPI.Entity.Types;
 
 import java.io.Serializable;
-import java.util.Date;
 
-import Entity.Types.EventType;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
 @NoArgsConstructor
+@AllArgsConstructor
 @Getter
 @Setter
 @ToString
-public class Event implements Serializable {
+public class MenuType implements Serializable {
 
     private static final long serialVersionUID = 1L;
     
-    private Integer ID_EVENT;
-    private EventType EVENT_TYPE;
-    private User USER;
-    private Date LOG_DATE;
-
+    private Integer ID_MENU_TYPE;
+    private String NAME;
+    
 }
