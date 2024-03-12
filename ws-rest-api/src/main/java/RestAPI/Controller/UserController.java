@@ -25,10 +25,10 @@ public class UserController implements Serializable {
             connection = mySQLDriver.getConnection();
             connection.setAutoCommit(false);
 
-            String sql = "SELECT U.ID_USER, U.LOGIN_NAME, U.PASSWORD, U.USERNAME, U.EMAIL, U.ID_ROLE, " + 
+            String sql = "SELECT U.ID_USER, U.LOGIN_NAME, REPEAT('*', LENGTH(U.PASSWORD)), U.USERNAME, U.EMAIL, U.ID_ROLE, " +
                         "CASE " +
-                        "WHEN U.STATUS = 1 THEN 'ONLINE'" +
-                        "ELSE 'OFFLINE'" +
+                        "WHEN U.STATUS = 1 THEN 'ACTIVE'" +
+                        "ELSE 'NOT ACTIVE'" +
                         "END " +
                         "FROM USER U";
 
@@ -39,7 +39,7 @@ public class UserController implements Serializable {
                 User user = new User();
                 user.setID_USER(rs.getLong(1));
                 user.setLOGIN_NAME(rs.getString(2));
-                user.setPASSWORD("***");
+                user.setPASSWORD(rs.getString(3));
                 user.setUSERNAME(rs.getString(4));
                 user.setEMAIL(rs.getString(5));
                 user.setROLE(null);
