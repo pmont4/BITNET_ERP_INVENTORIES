@@ -18,7 +18,7 @@ public class Role implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private Integer ID_ROLE;
+    private Long ID_ROLE;
     private String NAME;
 
     private List<Menu> LST_MENU;

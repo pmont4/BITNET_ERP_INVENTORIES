@@ -14,10 +14,9 @@ import jakarta.ws.rs.core.Response.Status;
 import lombok.NoArgsConstructor;
 
 @Path("bitnet/user")
-@NoArgsConstructor
 public class UserResource implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+        private static final long serialVersionUID = 1L;
 
     private UserController userController;
     

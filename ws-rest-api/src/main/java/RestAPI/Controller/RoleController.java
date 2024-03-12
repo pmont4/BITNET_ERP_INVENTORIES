@@ -1,5 +1,8 @@
 package RestAPI.Controller;
 
+import RestAPI.Entity.Role;
+import RestAPI.Util.MySQLDriver;
+
 import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -9,16 +12,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import RestAPI.Entity.Role;
-import RestAPI.Entity.User;
-import RestAPI.Util.MySQLDriver;
-
-public class UserController implements Serializable {
+public class RoleController implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    public List<User> getAllUsers() {
-        List<User> result = new ArrayList<>();
+    public List<Role> getAllRoles() {
+        List<Role> result = new ArrayList<>();
         Connection connection = null;
 
         try {
@@ -26,36 +25,16 @@ public class UserController implements Serializable {
             connection = mySQLDriver.getConnection();
             connection.setAutoCommit(false);
 
-            String sql = "SELECT U.ID_USER, U.LOGIN_NAME, REPEAT('*', LENGTH(U.PASSWORD)), U.USERNAME, U.EMAIL, U.ID_ROLE, " +
-                        "CASE " +
-                        "WHEN U.STATUS = 1 THEN 'ACTIVE'" +
-                        "ELSE 'NOT ACTIVE'" +
-                        "END " +
-                        "FROM USER U";
+            String sql = "SELECT R.ID_ROLE, R.NAME FROM ROLE R";
 
             Statement stmt = connection.createStatement();
             ResultSet rs = stmt.executeQuery(sql);
 
-            RoleController roleController = new RoleController();
-
             while (rs.next()) {
-                User user = new User();
-                user.setID_USER(rs.getLong(1));
-                user.setLOGIN_NAME(rs.getString(2));
-                user.setPASSWORD(rs.getString(3));
-                user.setUSERNAME(rs.getString(4));
-                user.setEMAIL(rs.getString(5));
-
-                Long id_role = rs.getLong(6);
-                if (roleController.getRole(Integer.valueOf(String.valueOf(id_role))).isPresent()) {
-                    Role role = roleController.getRole(Integer.valueOf(String.valueOf(id_role))).get();
-                    user.setROLE(role);
-                } else {
-                    user.setROLE(null);
-                }
-
-                user.setSTATUS(rs.getString(7));
-                result.add(user);
+                Role role = new Role();
+                role.setID_ROLE(rs.getLong(1));
+                role.setNAME(rs.getString(2));
+                result.add(role);
             }
 
             rs.close();
@@ -63,7 +42,7 @@ public class UserController implements Serializable {
 
             connection.commit();
             connection.setAutoCommit(true);
-            
+
         } catch (SQLException e) {
             try {
                 if (connection != null) {
@@ -88,8 +67,8 @@ public class UserController implements Serializable {
         return result;
     }
 
-    public Optional<User> getUser(Integer id) {
-        return this.getAllUsers().stream().filter(u -> u.getID_USER() == Long.parseLong(String.valueOf(id))).findFirst();
+    public Optional<Role> getRole(Integer id) {
+        return this.getAllRoles().stream().filter(u -> u.getID_ROLE() == Long.parseLong(String.valueOf(id))).findFirst();
     }
-    
+
 }
