@@ -19,7 +19,7 @@ public class Menu implements Serializable {
     
     private static final long serialVersionUID = 1L;
 
-    private Integer ID_MENU;
+    private Long ID_MENU;
     private String NAME;
     private MenuType MENU_TYPE;
 

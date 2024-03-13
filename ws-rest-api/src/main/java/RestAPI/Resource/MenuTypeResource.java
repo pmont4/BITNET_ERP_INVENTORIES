@@ -1,7 +1,12 @@
 package RestAPI.Resource;
 
-import RestAPI.Controller.RoleController;
-import RestAPI.Entity.Role;
+import java.io.Serializable;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.Optional;
+
+import RestAPI.Controller.MenuTypeController;
+import RestAPI.Entity.Types.MenuType;
 import RestAPI.Util.MySQLDriver;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
@@ -11,21 +16,16 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 
-import java.io.Serializable;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.Optional;
-
-@Path("bitnet/role")
-public class RoleResource implements Serializable {
+@Path("bitnet/menutype")
+public class MenuTypeResource implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private RoleController roleController;
+    private MenuTypeController menuTypeController;
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getAllRoles() {
+    public Response getAllMenuType() {
         Response response = null;
 
         MySQLDriver driver = new MySQLDriver();
@@ -35,7 +35,7 @@ public class RoleResource implements Serializable {
             connection.setAutoCommit(false);
 
             response = Response.ok(
-                this.getRoleController().getAllRoles(connection), 
+                this.getMenuTypeController().getAllMenuType(connection), 
                 MediaType.APPLICATION_JSON
             ).build();
 
@@ -71,7 +71,7 @@ public class RoleResource implements Serializable {
     @GET
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getRole(@PathParam("id") Integer id) {
+    public Response getMenuType(@PathParam("id") Integer id) {
         Response response = null;
 
         MySQLDriver driver = new MySQLDriver();
@@ -80,14 +80,14 @@ public class RoleResource implements Serializable {
         try {
             connection.setAutoCommit(false);
 
-            Optional<Role> role = this.getRoleController().getRole(connection, id);
-            if (role.isPresent()) {
+            Optional<MenuType> menutype = this.getMenuTypeController().getMenuType(connection, id);
+            if (menutype.isPresent()) {
                 response = Response.ok(
-                    role.get(), MediaType.APPLICATION_JSON
+                    menutype.get(), MediaType.APPLICATION_JSON
                 ).build();
             } else {
                 response = Response.status(Status.NOT_FOUND)
-                            .entity("The role with the ID: " + id + " wasn´t found int the database").build();
+                            .entity("The menu type with the ID: " + id + " wasn´t found int the database").build();
             }
 
             connection.commit();
@@ -119,11 +119,11 @@ public class RoleResource implements Serializable {
         return response;
     }
 
-    private RoleController getRoleController() {
-        if (roleController == null) {
-            roleController = new RoleController();
+    private MenuTypeController getMenuTypeController() {
+        if (menuTypeController == null) {
+            menuTypeController = new MenuTypeController();
         }
 
-        return roleController;
+        return menuTypeController;
     }
 }

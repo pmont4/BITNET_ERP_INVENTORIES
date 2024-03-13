@@ -1,7 +1,7 @@
 package RestAPI.Controller;
 
+import RestAPI.Entity.Menu;
 import RestAPI.Entity.Role;
-import RestAPI.Util.MySQLDriver;
 
 import java.io.Serializable;
 import java.sql.Connection;
@@ -16,59 +16,56 @@ public class RoleController implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    public List<Role> getAllRoles() {
+    public List<Role> getAllRoles(Connection connection) throws SQLException {
         List<Role> result = new ArrayList<>();
-        Connection connection = null;
 
-        try {
-            MySQLDriver mySQLDriver = new MySQLDriver();
-            connection = mySQLDriver.getConnection();
-            connection.setAutoCommit(false);
+        String sql = "SELECT R.ID_ROLE, R.NAME FROM ROLE R";
 
-            String sql = "SELECT R.ID_ROLE, R.NAME FROM ROLE R";
+        Statement stmt = connection.createStatement();
+        ResultSet rs = stmt.executeQuery(sql);
 
-            Statement stmt = connection.createStatement();
-            ResultSet rs = stmt.executeQuery(sql);
+        while (rs.next()) {
+            Role role = new Role();
+            role.setID_ROLE(rs.getLong(1));
+            role.setNAME(rs.getString(2));
 
-            while (rs.next()) {
-                Role role = new Role();
-                role.setID_ROLE(rs.getLong(1));
-                role.setNAME(rs.getString(2));
-                result.add(role);
-            }
+            List<Menu> menuList = this.getAllRoleMenu(connection, Integer.valueOf(String.valueOf(rs.getString(1))));
+            role.setLST_MENU(menuList);
 
-            rs.close();
-            stmt.close();
-
-            connection.commit();
-            connection.setAutoCommit(true);
-
-        } catch (SQLException e) {
-            try {
-                if (connection != null) {
-                    connection.rollback();
-                    connection.setAutoCommit(true);
-                    connection = null;
-                }
-
-                result = null;
-                System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " MESSAGE: " + e.toString());
-            } catch (SQLException e1) {
-                System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " MESSAGE-ROLLBACK BLOCk: " + e1.toString());
-            }
-        } finally {
-            try {
-                connection.close();
-            } catch (SQLException e) {
-                System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " MESSAGE-FINALLY BLOCk: " + e.toString());
-            }
+            result.add(role);
         }
+
+        rs.close();
+        stmt.close();
 
         return result;
     }
 
-    public Optional<Role> getRole(Integer id) {
-        return this.getAllRoles().stream().filter(u -> u.getID_ROLE() == Long.parseLong(String.valueOf(id))).findFirst();
+    public Optional<Role> getRole(Connection connection, Integer id) throws SQLException {
+        return this.getAllRoles(connection).stream().filter(u -> u.getID_ROLE() == Long.parseLong(String.valueOf(id))).findFirst();
+    }
+
+    public List<Menu> getAllRoleMenu(Connection connection, Integer id) throws SQLException {
+        List<Menu> result = new ArrayList<>();
+
+        String sql = "SELECT MR.ID_ROLE, MR.ID_MENU FROM MENU_ROLE MR WHERE MR.ID_ROLE = " + id;
+
+        Statement stmt = connection.createStatement();
+        ResultSet rs = stmt.executeQuery(sql);
+
+        MenuController menuContoller = new MenuController();
+
+        while (rs.next()) {
+            Optional<Menu> menu = menuContoller.getMenu(connection, Integer.valueOf(String.valueOf(rs.getLong(2))));
+            if (menu.isPresent()) {
+                result.add(menu.get());
+            }
+        }
+
+        rs.close();
+        stmt.close();
+
+        return result;
     }
 
 }

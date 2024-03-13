@@ -17,7 +17,7 @@ public class MenuType implements Serializable {
 
     private static final long serialVersionUID = 1L;
     
-    private Integer ID_MENU_TYPE;
+    private Long ID_MENU_TYPE;
     private String NAME;
     
 }
