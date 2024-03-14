@@ -48,9 +48,7 @@ public class UserController implements Serializable {
                         user.setROLE(null);
                     } else {
                         Optional<Role> role = roleController.getRole(connection, Integer.valueOf(String.valueOf(id_role)));
-                        if (role.isPresent()) {
-                            user.setROLE(role.get());
-                        }
+                        role.ifPresent(user::setROLE);
                     }
 
                     user.setSTATUS(rs.getString(7));

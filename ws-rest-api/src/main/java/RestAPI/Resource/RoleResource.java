@@ -16,8 +16,10 @@ import java.util.Optional;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
+import lombok.NoArgsConstructor;
 
 @Path("bitnet/role")
+@NoArgsConstructor
 public class RoleResource implements Serializable {
 
     private static final long serialVersionUID = 1L;

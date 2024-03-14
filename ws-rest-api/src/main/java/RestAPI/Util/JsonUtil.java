@@ -9,7 +9,9 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 
 import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
+@NoArgsConstructor
 public class JsonUtil implements Serializable {
     
     private static final long serialVersionUID = 1L;
