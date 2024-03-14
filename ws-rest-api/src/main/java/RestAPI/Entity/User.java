@@ -2,6 +2,7 @@ package RestAPI.Entity;
 
 import java.io.Serializable;
 
+import jakarta.annotation.Nullable;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -22,7 +23,10 @@ public class User implements Serializable {
     private String PASSWORD;
     private String USERNAME;
     private String EMAIL;
+
+    @Nullable
     private Role ROLE;
+    
     private String STATUS;
  
 }

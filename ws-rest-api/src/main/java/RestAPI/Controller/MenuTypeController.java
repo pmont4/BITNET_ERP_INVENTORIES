@@ -20,18 +20,16 @@ public class MenuTypeController  implements Serializable {
 
         String sql = "SELECT MT.ID_MENU_TYPE, MT.NAME FROM MENU_TYPE MT";
 
-        Statement stmt = connection.createStatement();
-        ResultSet rs = stmt.executeQuery(sql);
-
-        while (rs.next()) {
-            MenuType menuType = new MenuType();
-            menuType.setID_MENU_TYPE(rs.getLong(1));
-            menuType.setNAME(rs.getString(2));
-            result.add(menuType);
+        try (Statement stmt = connection.createStatement()) {
+            try (ResultSet rs = stmt.executeQuery(sql)) {
+                while (rs.next()) {
+                    MenuType menuType = new MenuType();
+                    menuType.setID_MENU_TYPE(rs.getLong(1));
+                    menuType.setNAME(rs.getString(2));
+                    result.add(menuType);
+                }
+            }
         }
-
-        rs.close();
-        stmt.close();
 
         return result;
     }

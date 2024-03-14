@@ -3,6 +3,7 @@ package RestAPI.Entity;
 import java.io.Serializable;
 import java.util.List;
 
+import jakarta.annotation.Nullable;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -21,6 +22,7 @@ public class Role implements Serializable {
     private Long ID_ROLE;
     private String NAME;
 
+    @Nullable
     private List<Menu> LST_MENU;
     
 }
