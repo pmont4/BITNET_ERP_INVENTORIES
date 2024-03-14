@@ -24,6 +24,6 @@ public class Menu implements Serializable {
     private MenuType MENU_TYPE;
 
     @Nullable
-    private Menu PARENT_MENU;
+    private Long ID_PARENT_MENU;
 
 }

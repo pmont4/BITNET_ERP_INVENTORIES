@@ -7,16 +7,17 @@ import java.util.Optional;
 
 import RestAPI.Controller.MenuTypeController;
 import RestAPI.Entity.Types.MenuType;
+import RestAPI.Util.JsonUtil;
 import RestAPI.Util.MySQLDriver;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.PathParam;
-import jakarta.ws.rs.Produces;
+import com.fasterxml.jackson.core.type.TypeReference;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
+import lombok.NoArgsConstructor;
 
 @Path("bitnet/menutype")
+@NoArgsConstructor
 public class MenuTypeResource implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -26,42 +27,27 @@ public class MenuTypeResource implements Serializable {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAllMenuType() {
-        Response response = null;
+        Response response;
 
         MySQLDriver driver = new MySQLDriver();
         Connection connection = driver.getConnection();
 
         try {
-            connection.setAutoCommit(false);
-
             response = Response.ok(
                 this.getMenuTypeController().getAllMenuType(connection), 
                 MediaType.APPLICATION_JSON
             ).build();
+        } catch(Exception e) {
+            response = Response.status(Status.NOT_FOUND)
+                .entity("Can't bring data due to connection errors!")
+                .build();
 
-            connection.commit();
-            connection.setAutoCommit(true);
-        } catch(SQLException e) {
-            try {
-                if (connection != null) {
-                    connection.rollback();
-                    connection.commit();
-                    connection.setAutoCommit(true);
-                }
-
-                response = Response.status(Status.NOT_FOUND)
-                    .entity("Can't bring data due to connection errors!")
-                    .build();
-
-                System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " MESSAGE: " + e.toString());
-            } catch (SQLException e1) {
-                System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " MESSAGE-ROLLBACK: " + e1.toString());
-            }
+            System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " METHOD: getAllMenuType() MESSAGE: " + e);
         } finally {
             try {
                 connection.close();
             } catch (SQLException e) {
-                System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " MESSAGE-FINALLY: " + e.toString());
+                System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " METHOD: getAllMenuType() MESSAGE-FINALLY: " + e);
             }
         }
 
@@ -78,8 +64,6 @@ public class MenuTypeResource implements Serializable {
         Connection connection = driver.getConnection();
 
         try {
-            connection.setAutoCommit(false);
-
             Optional<MenuType> menutype = this.getMenuTypeController().getMenuType(connection, id);
             if (menutype.isPresent()) {
                 response = Response.ok(
@@ -89,30 +73,65 @@ public class MenuTypeResource implements Serializable {
                 response = Response.status(Status.NOT_FOUND)
                             .entity("The menu type with the ID: " + id + " wasn´t found int the database").build();
             }
+        } catch(Exception e) {
+            response = Response.status(Status.NOT_FOUND)
+                .entity("Can't bring data due to connection errors!")
+                .build();
+
+            System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " METHOD: getMenuType() MESSAGE: " + e);
+        } finally {
+            try {
+                connection.close();
+            } catch (SQLException e) {
+                System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " METHOD: getMenuType() MESSAGE-FINALLY: " + e);
+            }
+        }
+
+        return response;
+    }
+
+    @POST
+    @Path("add")
+    @Produces(MediaType.TEXT_PLAIN)
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response addMenuType(String json) {
+        Response response = null;
+
+        MySQLDriver driver = new MySQLDriver();
+        Connection connection = driver.getConnection();
+
+        try {
+            connection.setAutoCommit(false);
+
+            MenuType menuType = JsonUtil.getFromJson(json, new TypeReference<MenuType>() {
+            });
+
+            response = Response.ok(
+                    this.getMenuTypeController().addMenuType(connection, menuType), MediaType.TEXT_PLAIN
+            ).build();
 
             connection.commit();
             connection.setAutoCommit(true);
-        } catch(SQLException e) {
+        } catch(Exception e) {
             try {
                 if (connection != null) {
                     connection.rollback();
-                    connection.commit();
                     connection.setAutoCommit(true);
                 }
 
                 response = Response.status(Status.NOT_FOUND)
-                    .entity("Can't bring data due to connection errors!")
-                    .build();
+                        .entity("Can't insert data due to connection errors!")
+                        .build();
 
-                System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " MESSAGE: " + e.toString());
-            } catch (SQLException e1) {
-                System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " MESSAGE-ROLLBACK: " + e1.toString());
+                System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " METHOD: addMenuType() MESSAGE: " + e);
+            } catch(SQLException e1) {
+                System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " METHOD: addMenuType() MESSAGE-ROLLBACK: " + e1);
             }
         } finally {
             try {
                 connection.close();
             } catch (SQLException e) {
-                System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " MESSAGE-FINALLY: " + e.toString());
+                System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " METHOD: addMenuType() MESSAGE-FINALLY: " + e);
             }
         }
 

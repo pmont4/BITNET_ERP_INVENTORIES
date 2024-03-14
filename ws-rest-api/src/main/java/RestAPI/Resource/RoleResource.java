@@ -14,7 +14,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Optional;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.NoArgsConstructor;
 
@@ -29,42 +28,27 @@ public class RoleResource implements Serializable {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAllRoles() {
-        Response response = null;
+        Response response;
 
         MySQLDriver driver = new MySQLDriver();
         Connection connection = driver.getConnection();
 
         try {
-            connection.setAutoCommit(false);
-
             response = Response.ok(
                 this.getRoleController().getAllRoles(connection), 
                 MediaType.APPLICATION_JSON
             ).build();
+        } catch(Exception e) {
+            response = Response.status(Status.NOT_FOUND)
+                .entity("Can't bring data due to connection errors!")
+                .build();
 
-            connection.commit();
-            connection.setAutoCommit(true);
-        } catch(SQLException e) {
-            try {
-                if (connection != null) {
-                    connection.rollback();
-                    connection.commit();
-                    connection.setAutoCommit(true);
-                }
-
-                response = Response.status(Status.NOT_FOUND)
-                    .entity("Can't bring data due to connection errors!")
-                    .build();
-
-                System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " MESSAGE: " + e.toString());
-            } catch (SQLException e1) {
-                System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " MESSAGE-ROLLBACK: " + e1.toString());
-            }
+            System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " METHOD: getAllRoles() MESSAGE: " + e);
         } finally {
             try {
                 connection.close();
             } catch (SQLException e) {
-                System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " MESSAGE-FINALLY: " + e.toString());
+                System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " METHOD: getAllRoles() MESSAGE-FINALLY: " + e);
             }
         }
 
@@ -75,42 +59,27 @@ public class RoleResource implements Serializable {
     @Path("allowedmenu/{id}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAllowedMenusForRole(@PathParam("id") Integer id) {
-        Response response = null;
+        Response response;
 
         MySQLDriver driver = new MySQLDriver();
         Connection connection = driver.getConnection();
 
         try {
-            connection.setAutoCommit(false);
-
             response = Response.ok(
                 this.getRoleController().getAllRoleMenu(connection, id), 
                 MediaType.APPLICATION_JSON
             ).build();
+        } catch(Exception e) {
+            response = Response.status(Status.NOT_FOUND)
+                .entity("Can't bring data due to connection errors!")
+                .build();
 
-            connection.commit();
-            connection.setAutoCommit(true);
-        } catch(SQLException e) {
-            try {
-                if (connection != null) {
-                    connection.rollback();
-                    connection.commit();
-                    connection.setAutoCommit(true);
-                }
-
-                response = Response.status(Status.NOT_FOUND)
-                    .entity("Can't bring data due to connection errors!")
-                    .build();
-
-                System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " MESSAGE: " + e.toString());
-            } catch (SQLException e1) {
-                System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " MESSAGE-ROLLBACK: " + e1.toString());
-            }
+            System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " METHOD: getAllowedMenusForRole() MESSAGE: " + e);
         } finally {
             try {
                 connection.close();
             } catch (SQLException e) {
-                System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " MESSAGE-FINALLY: " + e.toString());
+                System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " METHOD: getAllowedMenusForRole() MESSAGE-FINALLY: " + e);
             }
         }
 
@@ -121,14 +90,12 @@ public class RoleResource implements Serializable {
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getRole(@PathParam("id") Integer id) {
-        Response response = null;
+        Response response;
 
         MySQLDriver driver = new MySQLDriver();
         Connection connection = driver.getConnection();
 
         try {
-            connection.setAutoCommit(false);
-
             Optional<Role> role = this.getRoleController().getRole(connection, id);
             if (role.isPresent()) {
                 response = Response.ok(
@@ -138,30 +105,17 @@ public class RoleResource implements Serializable {
                 response = Response.status(Status.NOT_FOUND)
                             .entity("The role with the ID: " + id + " wasn´t found int the database").build();
             }
+        } catch(Exception e) {
+            response = Response.status(Status.NOT_FOUND)
+                .entity("Can't bring data due to connection errors!")
+                .build();
 
-            connection.commit();
-            connection.setAutoCommit(true);
-        } catch(SQLException e) {
-            try {
-                if (connection != null) {
-                    connection.rollback();
-                    connection.commit();
-                    connection.setAutoCommit(true);
-                }
-
-                response = Response.status(Status.NOT_FOUND)
-                    .entity("Can't bring data due to connection errors!")
-                    .build();
-
-                System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " MESSAGE: " + e.toString());
-            } catch (SQLException e1) {
-                System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " MESSAGE-ROLLBACK: " + e1.toString());
-            }
+            System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " METHOD: getRole() MESSAGE: " + e);
         } finally {
             try {
                 connection.close();
             } catch (SQLException e) {
-                System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " MESSAGE-FINALLY: " + e.toString());
+                System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " METHOD: getRole() MESSAGE-FINALLY: " + e);
             }
         }
 
@@ -190,11 +144,10 @@ public class RoleResource implements Serializable {
 
             connection.commit();
             connection.setAutoCommit(true);
-        } catch(SQLException | JsonProcessingException e) {
+        } catch(Exception e) {
             try {
                 if (connection != null) {
                     connection.rollback();
-                    connection.commit();
                     connection.setAutoCommit(true);
                 }
     
@@ -202,15 +155,15 @@ public class RoleResource implements Serializable {
                     .entity("Can't insert data due to connection errors!")
                     .build();
     
-                System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " MESSAGE: " + e.toString());
+                System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " METHOD: addRole() MESSAGE: " + e);
             } catch(SQLException e1) {
-                System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " MESSAGE-ROLLBACK: " + e1.toString());
+                System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " METHOD: addRole() MESSAGE-ROLLBACK: " + e1);
             }
         } finally {
             try {
                 connection.close();
             } catch (SQLException e) {
-                System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " MESSAGE-FINALLY: " + e.toString());
+                System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " METHOD: addRole() MESSAGE-FINALLY: " + e);
             }
         }
 
@@ -235,11 +188,10 @@ public class RoleResource implements Serializable {
 
             connection.commit();
             connection.setAutoCommit(true);
-        } catch(SQLException e) {
+        } catch(Exception e) {
             try {
                 if (connection != null) {
                     connection.rollback();
-                    connection.commit();
                     connection.setAutoCommit(true);
                 }
     
@@ -247,15 +199,15 @@ public class RoleResource implements Serializable {
                     .entity("Can't delete data due to connection errors!")
                     .build();
     
-                System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " MESSAGE: " + e.toString());
+                System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " METHOD: removeRole() MESSAGE: " + e);
             } catch(SQLException e1) {
-                System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " MESSAGE-ROLLBACK: " + e1.toString());
+                System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " METHOD: removeRole() MESSAGE-ROLLBACK: " + e1);
             }
         } finally {
             try {
                 connection.close();
             } catch (SQLException e) {
-                System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " MESSAGE-FINALLY: " + e.toString());
+                System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " METHOD: removeRole() MESSAGE-FINALLY: " + e);
             }
         }
 
@@ -284,11 +236,10 @@ public class RoleResource implements Serializable {
 
             connection.commit();
             connection.setAutoCommit(true);
-        } catch(SQLException | JsonProcessingException e) {
+        } catch(Exception e) {
             try {
                 if (connection != null) {
                     connection.rollback();
-                    connection.commit();
                     connection.setAutoCommit(true);
                 }
 
@@ -296,15 +247,15 @@ public class RoleResource implements Serializable {
                         .entity("Can't insert data due to connection errors!")
                         .build();
 
-                System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " MESSAGE: " + e.toString());
+                System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " METHOD: updateRole() MESSAGE: " + e);
             } catch(SQLException e1) {
-                System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " MESSAGE-ROLLBACK: " + e1.toString());
+                System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " METHOD: updateRole() MESSAGE-ROLLBACK: " + e1);
             }
         } finally {
             try {
                 connection.close();
             } catch (SQLException e) {
-                System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " MESSAGE-FINALLY: " + e.toString());
+                System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " METHOD: updateRole() MESSAGE-FINALLY: " + e);
             }
         }
 
