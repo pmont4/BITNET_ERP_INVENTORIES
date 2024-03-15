@@ -138,6 +138,51 @@ public class MenuTypeResource implements Serializable {
         return response;
     }
 
+    @DELETE
+    @Path("remove/{id}")
+    @Produces(MediaType.TEXT_PLAIN)
+    public Response removeMenuType(@PathParam("id") Integer id) {
+        Response response = null;
+
+        MySQLDriver driver = new MySQLDriver();
+        Connection connection = driver.getConnection();
+
+        try {
+            connection.setAutoCommit(false);
+
+            response = Response.ok(
+                    this.getMenuTypeController().removeMenuType(connection, id), MediaType.TEXT_PLAIN
+            ).build();
+
+            connection.commit();
+            connection.setAutoCommit(true);
+        } catch(Exception e) {
+            try {
+                if (connection != null) {
+                    connection.rollback();
+                    connection.setAutoCommit(true);
+                }
+
+                response = Response.status(Status.NOT_FOUND)
+                        .entity("Can't delete data due to connection errors!")
+                        .build();
+
+                System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " METHOD: removeMenuType() MESSAGE: " + e);
+            } catch(SQLException e1) {
+                System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " METHOD: removeMenuType() MESSAGE-ROLLBACK: " + e1);
+            }
+        } finally {
+            try {
+                connection.close();
+            } catch (SQLException e) {
+                System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " METHOD: removeMenuType() MESSAGE-FINALLY: " + e);
+            }
+        }
+
+        return response;
+    }
+
+
     private MenuTypeController getMenuTypeController() {
         if (menuTypeController == null) {
             menuTypeController = new MenuTypeController();

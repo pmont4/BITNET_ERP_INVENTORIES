@@ -24,7 +24,7 @@ public class MenuController implements Serializable {
             String sql = "SELECT M.ID_MENU, M.NAME, M.ID_MENU_TYPE, M.ID_PARENT_MENU FROM MENU M";
 
             PreparedStatement stmt = connection.prepareStatement(sql);
-            ResultSet rs = stmt.executeQuery(sql);
+            ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
                 Menu menu = new Menu();
                 menu.setID_MENU(rs.getLong(1));

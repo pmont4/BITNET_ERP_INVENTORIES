@@ -21,7 +21,7 @@ public class MenuTypeController  implements Serializable {
             String sql = "SELECT MT.ID_MENU_TYPE, MT.NAME FROM MENU_TYPE MT";
 
             PreparedStatement stmt = connection.prepareStatement(sql);
-            ResultSet rs = stmt.executeQuery(sql);
+            ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
                 MenuType menuType = new MenuType();
                 menuType.setID_MENU_TYPE(rs.getLong(1));
@@ -46,7 +46,7 @@ public class MenuTypeController  implements Serializable {
 
             PreparedStatement stmt = connection.prepareStatement(sql);
             stmt.setLong(1, Long.valueOf(id));
-            ResultSet rs = stmt.executeQuery(sql);
+            ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
                 MenuType menuType = new MenuType();
                 menuType.setID_MENU_TYPE(rs.getLong(1));
@@ -86,6 +86,54 @@ public class MenuTypeController  implements Serializable {
             stmt2.close();
         } catch (Exception e) {
             System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " METHOD: addMenuType() MESSAGE: " + e);
+        }
+
+        return result;
+    }
+
+    public String removeMenuType(Connection connection, Integer id) {
+        String result = "";
+
+        try {
+            List<Long> idListMenu = new ArrayList<>();
+
+            String sql = "SELECT M.ID_MENU FROM MENU M WHERE M.ID_MENU_TYPE = ?";
+            PreparedStatement stmt = connection.prepareStatement(sql);
+            stmt.setLong(1, Long.valueOf(id));
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                Long idMenu = rs.getLong(1);
+                idListMenu.add(idMenu);
+            }
+            rs.close();
+            stmt.close();
+
+            if (idListMenu.size() > 1 && !idListMenu.isEmpty()) {
+                idListMenu.forEach(i -> {
+                    try {
+                        String delete = "DELETE FROM MENU_ROLE MR WHERE MR.ID_MENU = ?";
+                        PreparedStatement stmt2 = connection.prepareStatement(delete);
+                        stmt2.setLong(1, i);
+                        stmt2.executeUpdate();
+                        stmt2.close();
+                    } catch (SQLException e) {
+                        System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " METHOD: removeMenuType() MESSAGE: " + e);
+                    }
+                });
+                idListMenu.forEach(i -> {
+                    try {
+                        String delete = "DELETE FROM MENU M WHERE M.ID_MENU_TYPE = ?";
+                        PreparedStatement stmt2 = connection.prepareStatement(delete);
+                        stmt2.setLong(1, i);
+                        stmt2.executeUpdate();
+                        stmt2.close();
+                    } catch (SQLException e) {
+                        System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " METHOD: removeMenuType() MESSAGE: " + e);
+                    }
+                });
+            }
+        } catch (Exception e) {
+            System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " METHOD: removeMenuType() MESSAGE: " + e);
         }
 
         return result;

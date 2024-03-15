@@ -24,7 +24,7 @@ public class RoleController implements Serializable {
             String sql = "SELECT R.ID_ROLE, R.NAME FROM ROLE R";
 
             PreparedStatement stmt = connection.prepareStatement(sql);
-            ResultSet rs = stmt.executeQuery(sql);
+            ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
                 Role role = new Role();
                 role.setID_ROLE(rs.getLong(1));
