@@ -12,6 +12,7 @@ import java.util.Optional;
 import RestAPI.Entity.Role;
 import RestAPI.Entity.User;
 import lombok.NoArgsConstructor;
+import org.apache.commons.codec.digest.DigestUtils;
 
 @NoArgsConstructor
 public class UserController implements Serializable {
@@ -27,7 +28,7 @@ public class UserController implements Serializable {
             String sql = "SELECT " +
                     "U.ID_USER, " +
                     "U.LOGIN_NAME, " +
-                    "REPEAT('*', LENGTH(U.PASSWORD)), " +
+                    "REPEAT('*', 8), " +
                     "U.USERNAME, " +
                     "U.EMAIL, " +
                     "U.ID_ROLE, " +
@@ -73,7 +74,7 @@ public class UserController implements Serializable {
             String sql = "SELECT " +
                     "U.ID_USER, " +
                     "U.LOGIN_NAME, " +
-                    "REPEAT('*', LENGTH(U.PASSWORD)), " +
+                    "REPEAT('*', 8), " +
                     "U.USERNAME, " +
                     "U.EMAIL, " +
                     "U.ID_ROLE, " +
@@ -130,7 +131,7 @@ public class UserController implements Serializable {
             PreparedStatement stmt2 = connection.prepareStatement(insert);
             stmt2.setLong(1, id_user);
             stmt2.setString(2, user.getLOGIN_NAME());
-            stmt2.setString(3, user.getPASSWORD());
+            stmt2.setString(3, DigestUtils.sha256Hex(user.getPASSWORD()));
             stmt2.setString(4, user.getUSERNAME());
             stmt2.setString(5, user.getEMAIL());
 
@@ -208,6 +209,54 @@ public class UserController implements Serializable {
         }
 
         return result;
+    }
+
+    public Optional<User> authentication(Connection connection, String login_name, String password) {
+        Optional<User> opt = Optional.empty();
+
+        RoleController roleController = new RoleController();
+
+        try {
+            String sql = "SELECT " +
+                    "U.ID_USER, " +
+                    "U.LOGIN_NAME, " +
+                    "REPEAT('*', 8), " +
+                    "U.USERNAME, " +
+                    "U.EMAIL, " +
+                    "U.ID_ROLE, " +
+                    "CASE " +
+                    "WHEN U.STATUS = 1 THEN 'ACTIVE'" +
+                    "ELSE 'NOT ACTIVE'" +
+                    "END " +
+                    "FROM USER U " +
+                    "WHERE U.LOGIN_NAME = ? AND U.PASSWORD = ?";
+            PreparedStatement stmt = connection.prepareStatement(sql);
+            stmt.setString(1, login_name);
+            stmt.setString(2, DigestUtils.sha256Hex(password));
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                User user = new User();
+                user.setID_USER(rs.getLong(1));
+                user.setLOGIN_NAME(rs.getString(2));
+                user.setPASSWORD(rs.getString(3));
+                user.setUSERNAME(rs.getString(4));
+                user.setEMAIL(rs.getString(5));
+
+                Long id_role = rs.getLong(6);
+                Optional<Role> role = roleController.getRole(connection, Integer.valueOf(String.valueOf(id_role)));
+                role.ifPresent(user::setROLE);
+                user.setSTATUS(rs.getString(7));
+                opt = Optional.of(user);
+            }
+
+            rs.close();
+            stmt.close();
+        } catch (Exception e) {
+            System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " METHOD: authentication() MESSAGE: " + e);
+        }
+
+        return opt;
     }
 
     public boolean existsUser(Connection connection, Integer id) {

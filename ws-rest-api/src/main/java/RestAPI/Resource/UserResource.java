@@ -111,7 +111,7 @@ public class UserResource implements Serializable {
         try {
             connection.setAutoCommit(false);
 
-            User user = JsonUtil.getFromJson(json, new TypeReference<User>() {
+            User user = JsonUtil.getFromJson(json, new TypeReference<>() {
             });
 
             response = Response.ok(
@@ -244,6 +244,44 @@ public class UserResource implements Serializable {
                 connection.close();
             } catch (SQLException e) {
                 System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " METHOD: updateUser() MESSAGE-FINALLY: " + e);
+            }
+        }
+
+        return response;
+    }
+
+    @GET
+    @Path("auth/{login_name}/{password}")
+    @Produces({"application/json", "text/plain"})
+    public Response authentication(@PathParam("login_name") String login_name,
+                                   @PathParam("password") String password) {
+        Response response;
+
+        MySQLDriver driver = new MySQLDriver();
+        Connection connection = driver.getConnection();
+
+        try {
+            Optional<User> user = this.getUserController().authentication(connection, login_name, password);
+            if (user.isPresent()) {
+                response = Response.ok(
+                        user.get(), MediaType.APPLICATION_JSON
+                ).build();
+            } else {
+                response = Response.status(Status.NOT_FOUND).entity(
+                        "The username or the password are not correct."
+                ).build();
+            }
+        } catch (Exception e) {
+            response = Response.status(Status.NOT_FOUND)
+                    .entity("Can't bring data due to connection errors!")
+                    .build();
+
+            System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " METHOD: getUser() MESSAGE: " + e);
+        } finally {
+            try {
+                connection.close();
+            } catch (SQLException e) {
+                System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " METHOD: getUser() MESSAGE-FINALLY: " + e);
             }
         }
 
