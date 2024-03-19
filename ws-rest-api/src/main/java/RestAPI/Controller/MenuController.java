@@ -102,11 +102,33 @@ public class MenuController implements Serializable {
             stmt2.setLong(1, id_menu);
             stmt2.setString(2, menu.getNAME());
             stmt2.setLong(3, menu.getMENU_TYPE().getID_MENU_TYPE());
-            if (menu.getID_PARENT_MENU() == 0 || Objects.isNull(menu.getID_PARENT_MENU())) {
-                stmt2.setNull(4, Types.NULL);
-            } else {
-                stmt2.setLong(4, menu.getID_PARENT_MENU());
-            }
+
+            Optional<Long> idParentMenuOPT = Optional.ofNullable(menu.getID_PARENT_MENU());
+            idParentMenuOPT.ifPresentOrElse(
+                    (idpm) -> {
+                        try {
+                            if (menu.getID_PARENT_MENU() == 0) {
+                                stmt2.setNull(4, Types.NULL);
+                            } else {
+                                if (this.existsMenu(connection, Integer.valueOf(String.valueOf(idpm)))) {
+                                    stmt2.setLong(4, idpm);
+                                } else {
+                                    stmt2.setNull(4, Types.NULL);
+                                }
+                            }
+                        } catch (SQLException e) {
+                            System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " METHOD: addMenu() - OPTIONAL-PRESENT MESSAGE: " + e);
+                        }
+                    },
+                    () -> {
+                        try {
+                            stmt2.setNull(4, Types.NULL);
+                        } catch (SQLException e) {
+                            System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " METHOD: addMenu() - OPTIONAL-EMPTY MESSAGE: " + e);
+                        }
+                    }
+            );
+
             stmt2.executeUpdate();
             stmt2.close();
 
