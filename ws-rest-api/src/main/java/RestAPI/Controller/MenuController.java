@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import RestAPI.Entity.Menu;
@@ -101,11 +102,15 @@ public class MenuController implements Serializable {
             stmt2.setLong(1, id_menu);
             stmt2.setString(2, menu.getNAME());
             stmt2.setLong(3, menu.getMENU_TYPE().getID_MENU_TYPE());
-            stmt2.setLong(4, menu.getID_PARENT_MENU());
+            if (menu.getID_PARENT_MENU() == 0 || Objects.isNull(menu.getID_PARENT_MENU())) {
+                stmt2.setNull(4, Types.NULL);
+            } else {
+                stmt2.setLong(4, menu.getID_PARENT_MENU());
+            }
             stmt2.executeUpdate();
             stmt2.close();
 
-            result = "The menu with the name: " + menu.getNAME() + " and the ID: " + menu.getID_MENU() + " has been correctly created in the database.";
+            result = "The menu with the name: " + menu.getNAME() + " and the ID: " + id_menu + " has been correctly created in the database.";
         } catch (Exception e) {
             System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " METHOD: addMenu() MESSAGE: " + e);
         }
