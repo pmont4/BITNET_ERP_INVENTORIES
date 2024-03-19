@@ -105,18 +105,12 @@ public class EventTypeResource implements Serializable {
             EventType eventType = JsonUtil.getFromJson(json, new TypeReference<EventType>() {
             });
 
-            if (this.getEventTypeController().existsEventType(connection, Integer.valueOf(String.valueOf(eventType.getID_EVENT_TYPE())))) {
-                response = Response.status(Response.Status.NOT_FOUND)
-                        .entity("The event type with the ID: " + eventType.getID_EVENT_TYPE() + " already exists in the database.")
-                        .build();
-            } else {
-                response = Response.ok(
-                        this.getEventTypeController().addEventType(connection, eventType), MediaType.TEXT_PLAIN
-                ).build();
+            response = Response.ok(
+                    this.getEventTypeController().addEventType(connection, eventType), MediaType.TEXT_PLAIN
+            ).build();
 
-                connection.commit();
-                connection.setAutoCommit(true);
-            }
+            connection.commit();
+            connection.setAutoCommit(true);
         } catch (Exception e) {
             try {
                 if (connection != null) {

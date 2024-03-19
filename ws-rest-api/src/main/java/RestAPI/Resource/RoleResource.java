@@ -138,18 +138,12 @@ public class RoleResource implements Serializable {
             Role role = JsonUtil.getFromJson(json, new TypeReference<Role>() {
             });
 
-            if (this.getRoleController().existsRole(connection, Integer.valueOf(String.valueOf(role.getID_ROLE())))) {
-                response = Response.status(Response.Status.NOT_FOUND)
-                        .entity("The role with the ID: " + role.getID_ROLE() +  " already exists in the database.")
-                        .build();
-            } else {
-                response = Response.ok(
-                        this.getRoleController().addRole(connection, role), MediaType.TEXT_PLAIN
-                ).build();
+            response = Response.ok(
+                    this.getRoleController().addRole(connection, role), MediaType.TEXT_PLAIN
+            ).build();
 
-                connection.commit();
-                connection.setAutoCommit(true);
-            }
+            connection.commit();
+            connection.setAutoCommit(true);
         } catch (Exception e) {
             try {
                 if (connection != null) {

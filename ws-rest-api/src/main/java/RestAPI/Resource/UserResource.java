@@ -31,7 +31,7 @@ public class UserResource implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private UserController userController;
-    
+
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAllUsers() {
@@ -42,13 +42,13 @@ public class UserResource implements Serializable {
 
         try {
             response = Response.ok(
-                this.getUserController().getAllUsers(connection), 
-                MediaType.APPLICATION_JSON
+                    this.getUserController().getAllUsers(connection),
+                    MediaType.APPLICATION_JSON
             ).build();
-        } catch(Exception e) {
+        } catch (Exception e) {
             response = Response.status(Status.NOT_FOUND)
-                .entity("Can't bring data due to connection errors!")
-                .build();
+                    .entity("Can't bring data due to connection errors!")
+                    .build();
 
             System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " METHOD: getAllUsers() MESSAGE: " + e);
         } finally {
@@ -75,16 +75,16 @@ public class UserResource implements Serializable {
             Optional<User> user = this.getUserController().getUser(connection, id);
             if (user.isPresent()) {
                 response = Response.ok(
-                    user.get(), MediaType.APPLICATION_JSON
+                        user.get(), MediaType.APPLICATION_JSON
                 ).build();
             } else {
                 response = Response.status(Status.NOT_FOUND)
-                            .entity("The user with the ID: " + id + " wasn´t found int the database").build();
+                        .entity("The user with the ID: " + id + " wasn´t found int the database").build();
             }
-        } catch(Exception e) {
+        } catch (Exception e) {
             response = Response.status(Status.NOT_FOUND)
-                .entity("Can't bring data due to connection errors!")
-                .build();
+                    .entity("Can't bring data due to connection errors!")
+                    .build();
 
             System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " METHOD: getUser() MESSAGE: " + e);
         } finally {
@@ -111,34 +111,28 @@ public class UserResource implements Serializable {
         try {
             connection.setAutoCommit(false);
 
-            User user = JsonUtil.getFromJson(json, new TypeReference<User>() { 
+            User user = JsonUtil.getFromJson(json, new TypeReference<User>() {
             });
 
-            if (this.getUserController().existsUser(connection, Integer.valueOf(String.valueOf(user.getID_USER())))) {
-                response = Response.status(Response.Status.NOT_FOUND)
-                        .entity("The user with the ID: " + user.getID_USER() + " already exists in the database.")
-                        .build();
-            } else {
-                response = Response.ok(
-                        this.getUserController().addUser(connection, user), MediaType.TEXT_PLAIN
-                ).build();
+            response = Response.ok(
+                    this.getUserController().addUser(connection, user), MediaType.TEXT_PLAIN
+            ).build();
 
-                connection.commit();
-                connection.setAutoCommit(true);
-            }
-        } catch(Exception e) {
+            connection.commit();
+            connection.setAutoCommit(true);
+        } catch (Exception e) {
             try {
                 if (connection != null) {
                     connection.rollback();
                     connection.setAutoCommit(true);
                 }
-    
+
                 response = Response.status(Status.NOT_FOUND)
-                    .entity("Can't insert data due to connection errors!")
-                    .build();
-    
+                        .entity("Can't insert data due to connection errors!")
+                        .build();
+
                 System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " METHOD: addUser() MESSAGE: " + e);
-            } catch(SQLException e1) {
+            } catch (SQLException e1) {
                 System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " METHOD: addUser() MESSAGE-ROLLBACK: " + e1);
             }
         } finally {
@@ -176,19 +170,19 @@ public class UserResource implements Serializable {
                 connection.commit();
                 connection.setAutoCommit(true);
             }
-        } catch(Exception e) {
+        } catch (Exception e) {
             try {
                 if (connection != null) {
                     connection.rollback();
                     connection.setAutoCommit(true);
                 }
-    
+
                 response = Response.status(Status.NOT_FOUND)
-                    .entity("Can't delete data due to connection errors!")
-                    .build();
-    
+                        .entity("Can't delete data due to connection errors!")
+                        .build();
+
                 System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " METHOD: removeUser() MESSAGE: " + e);
-            } catch(SQLException e1) {
+            } catch (SQLException e1) {
                 System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " METHOD: removeUser() MESSAGE-ROLLBACK: " + e1);
             }
         } finally {
@@ -215,7 +209,7 @@ public class UserResource implements Serializable {
         try {
             connection.setAutoCommit(false);
 
-            User user = JsonUtil.getFromJson(json, new TypeReference<User>() { 
+            User user = JsonUtil.getFromJson(json, new TypeReference<User>() {
             });
 
             if (!this.getUserController().existsUser(connection, Integer.valueOf(String.valueOf(user.getID_USER())))) {
@@ -230,19 +224,19 @@ public class UserResource implements Serializable {
                 connection.commit();
                 connection.setAutoCommit(true);
             }
-        } catch(Exception e) {
+        } catch (Exception e) {
             try {
                 if (connection != null) {
                     connection.rollback();
                     connection.setAutoCommit(true);
                 }
-    
+
                 response = Response.status(Status.NOT_FOUND)
-                    .entity("Can't update data due to connection errors!")
-                    .build();
-    
+                        .entity("Can't update data due to connection errors!")
+                        .build();
+
                 System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " METHOD: updateUser() MESSAGE: " + e);
-            } catch(SQLException e1) {
+            } catch (SQLException e1) {
                 System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " METHOD: updateUser() MESSAGE-ROLLBACK: " + e1);
             }
         } finally {

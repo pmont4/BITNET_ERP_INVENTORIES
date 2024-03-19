@@ -106,19 +106,13 @@ public class MenuResource implements Serializable {
             Menu menu = JsonUtil.getFromJson(json, new TypeReference<Menu>() {
             });
 
-            if (this.getMenuController().existsMenu(connection, Integer.valueOf(String.valueOf(menu.getID_MENU())))) {
-                response = Response.status(Response.Status.NOT_FOUND)
-                        .entity("The menu with the ID: " + menu.getID_MENU() + " already exists in the database.")
-                        .build();
-            } else {
-                response = Response.ok(
-                        this.getMenuController().addMenu(connection, menu), MediaType.TEXT_PLAIN
-                ).build();
+            response = Response.ok(
+                    this.getMenuController().addMenu(connection, menu), MediaType.TEXT_PLAIN
+            ).build();
 
-                connection.commit();
-                connection.setAutoCommit(true);
-            }
-        } catch(Exception e) {
+            connection.commit();
+            connection.setAutoCommit(true);
+        } catch (Exception e) {
             try {
                 if (connection != null) {
                     connection.rollback();
@@ -130,7 +124,7 @@ public class MenuResource implements Serializable {
                         .build();
 
                 System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " METHOD: addMenu() MESSAGE: " + e);
-            } catch(SQLException e1) {
+            } catch (SQLException e1) {
                 System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " METHOD: addMenu() MESSAGE-ROLLBACK: " + e1);
             }
         } finally {

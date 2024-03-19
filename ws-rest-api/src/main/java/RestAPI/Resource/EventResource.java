@@ -37,7 +37,7 @@ public class EventResource implements Serializable {
                     this.getEventController().getAllEvent(connection),
                     MediaType.APPLICATION_JSON
             ).build();
-        } catch(Exception e) {
+        } catch (Exception e) {
             response = Response.status(Response.Status.NOT_FOUND)
                     .entity("Can't bring data due to connection errors!")
                     .build();
@@ -73,7 +73,7 @@ public class EventResource implements Serializable {
                 response = Response.status(Response.Status.NOT_FOUND)
                         .entity("The event with the ID: " + id + " wasn´t found int the database").build();
             }
-        } catch(Exception e) {
+        } catch (Exception e) {
             response = Response.status(Response.Status.NOT_FOUND)
                     .entity("Can't bring data due to connection errors!")
                     .build();
@@ -106,18 +106,12 @@ public class EventResource implements Serializable {
             Event event = JsonUtil.getFromJson(json, new TypeReference<Event>() {
             });
 
-            if (this.getEventController().existsEvent(connection, Integer.valueOf(String.valueOf(event.getID_EVENT())))) {
-                response = Response.status(Response.Status.NOT_FOUND)
-                        .entity("The event with the ID: " + event.getID_EVENT() + " already exists in the database.")
-                        .build();
-            } else {
-                response = Response.ok(
-                        this.getEventController().addEvent(connection, event), MediaType.TEXT_PLAIN
-                ).build();
+            response = Response.ok(
+                    this.getEventController().addEvent(connection, event), MediaType.TEXT_PLAIN
+            ).build();
 
-                connection.commit();
-                connection.setAutoCommit(true);
-            }
+            connection.commit();
+            connection.setAutoCommit(true);
         } catch (Exception e) {
             try {
                 if (connection != null) {

@@ -35,13 +35,13 @@ public class MenuTypeResource implements Serializable {
 
         try {
             response = Response.ok(
-                this.getMenuTypeController().getAllMenuType(connection), 
-                MediaType.APPLICATION_JSON
+                    this.getMenuTypeController().getAllMenuType(connection),
+                    MediaType.APPLICATION_JSON
             ).build();
-        } catch(Exception e) {
+        } catch (Exception e) {
             response = Response.status(Status.NOT_FOUND)
-                .entity("Can't bring data due to connection errors!")
-                .build();
+                    .entity("Can't bring data due to connection errors!")
+                    .build();
 
             System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " METHOD: getAllMenuType() MESSAGE: " + e);
         } finally {
@@ -68,16 +68,16 @@ public class MenuTypeResource implements Serializable {
             Optional<MenuType> menutype = this.getMenuTypeController().getMenuType(connection, id);
             if (menutype.isPresent()) {
                 response = Response.ok(
-                    menutype.get(), MediaType.APPLICATION_JSON
+                        menutype.get(), MediaType.APPLICATION_JSON
                 ).build();
             } else {
                 response = Response.status(Status.NOT_FOUND)
-                            .entity("The menu type with the ID: " + id + " wasn´t found int the database").build();
+                        .entity("The menu type with the ID: " + id + " wasn´t found int the database").build();
             }
-        } catch(Exception e) {
+        } catch (Exception e) {
             response = Response.status(Status.NOT_FOUND)
-                .entity("Can't bring data due to connection errors!")
-                .build();
+                    .entity("Can't bring data due to connection errors!")
+                    .build();
 
             System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " METHOD: getMenuType() MESSAGE: " + e);
         } finally {
@@ -107,19 +107,13 @@ public class MenuTypeResource implements Serializable {
             MenuType menuType = JsonUtil.getFromJson(json, new TypeReference<MenuType>() {
             });
 
-            if (this.getMenuTypeController().existsMenuType(connection, Integer.valueOf(String.valueOf(menuType.getID_MENU_TYPE())))) {
-                response = Response.status(Response.Status.NOT_FOUND)
-                        .entity("The menu with the ID: " + menuType.getID_MENU_TYPE() + " already exists in the database.")
-                        .build();
-            } else {
-                response = Response.ok(
-                        this.getMenuTypeController().addMenuType(connection, menuType), MediaType.TEXT_PLAIN
-                ).build();
+            response = Response.ok(
+                    this.getMenuTypeController().addMenuType(connection, menuType), MediaType.TEXT_PLAIN
+            ).build();
 
-                connection.commit();
-                connection.setAutoCommit(true);
-            }
-        } catch(Exception e) {
+            connection.commit();
+            connection.setAutoCommit(true);
+        } catch (Exception e) {
             try {
                 if (connection != null) {
                     connection.rollback();
@@ -131,7 +125,7 @@ public class MenuTypeResource implements Serializable {
                         .build();
 
                 System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " METHOD: addMenuType() MESSAGE: " + e);
-            } catch(SQLException e1) {
+            } catch (SQLException e1) {
                 System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " METHOD: addMenuType() MESSAGE-ROLLBACK: " + e1);
             }
         } finally {
@@ -169,7 +163,7 @@ public class MenuTypeResource implements Serializable {
                 connection.commit();
                 connection.setAutoCommit(true);
             }
-        } catch(Exception e) {
+        } catch (Exception e) {
             try {
                 if (connection != null) {
                     connection.rollback();
@@ -181,7 +175,7 @@ public class MenuTypeResource implements Serializable {
                         .build();
 
                 System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " METHOD: removeMenuType() MESSAGE: " + e);
-            } catch(SQLException e1) {
+            } catch (SQLException e1) {
                 System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " METHOD: removeMenuType() MESSAGE-ROLLBACK: " + e1);
             }
         } finally {
@@ -223,7 +217,7 @@ public class MenuTypeResource implements Serializable {
                 connection.commit();
                 connection.setAutoCommit(true);
             }
-        } catch(Exception e) {
+        } catch (Exception e) {
             try {
                 if (connection != null) {
                     connection.rollback();
@@ -235,7 +229,7 @@ public class MenuTypeResource implements Serializable {
                         .build();
 
                 System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " METHOD: updateMediaType() MESSAGE: " + e);
-            } catch(SQLException e1) {
+            } catch (SQLException e1) {
                 System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " METHOD: updateMediaType() MESSAGE-ROLLBACK: " + e1);
             }
         } finally {
