@@ -106,12 +106,18 @@ public class MenuResource implements Serializable {
             Menu menu = JsonUtil.getFromJson(json, new TypeReference<Menu>() {
             });
 
-            response = Response.ok(
-                    this.getMenuController().addMenu(connection, menu), MediaType.TEXT_PLAIN
-            ).build();
+            if (this.getMenuController().existsMenu(connection, Integer.valueOf(String.valueOf(menu.getID_MENU())))) {
+                response = Response.status(Response.Status.NOT_FOUND)
+                        .entity("The menu with the ID: " + menu.getID_MENU() + " already exists in the database.")
+                        .build();
+            } else {
+                response = Response.ok(
+                        this.getMenuController().addMenu(connection, menu), MediaType.TEXT_PLAIN
+                ).build();
 
-            connection.commit();
-            connection.setAutoCommit(true);
+                connection.commit();
+                connection.setAutoCommit(true);
+            }
         } catch(Exception e) {
             try {
                 if (connection != null) {
@@ -132,6 +138,110 @@ public class MenuResource implements Serializable {
                 connection.close();
             } catch (SQLException e) {
                 System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " METHOD: addMenu() MESSAGE-FINALLY: " + e);
+            }
+        }
+
+        return response;
+    }
+
+    @DELETE
+    @Path("remove/{id}")
+    @Produces(MediaType.TEXT_PLAIN)
+    public Response removeMenu(@PathParam("id") Integer id) {
+        Response response = null;
+
+        MySQLDriver driver = new MySQLDriver();
+        Connection connection = driver.getConnection();
+
+        try {
+            connection.setAutoCommit(false);
+
+            if (!this.getMenuController().existsMenu(connection, id)) {
+                response = Response.status(Response.Status.NOT_FOUND)
+                        .entity("The menu with the ID: " + id + " was not found in the database.")
+                        .build();
+            } else {
+                response = Response.ok(
+                        this.getMenuController().removeMenu(connection, id), MediaType.TEXT_PLAIN
+                ).build();
+
+                connection.commit();
+                connection.setAutoCommit(true);
+            }
+        } catch(Exception e) {
+            try {
+                if (connection != null) {
+                    connection.rollback();
+                    connection.setAutoCommit(true);
+                }
+
+                response = Response.status(Status.NOT_FOUND)
+                        .entity("Can't delete data due to connection errors!")
+                        .build();
+
+                System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " METHOD: removeMenu() MESSAGE: " + e);
+            } catch(SQLException e1) {
+                System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " METHOD: removeMenu() MESSAGE-ROLLBACK: " + e1);
+            }
+        } finally {
+            try {
+                connection.close();
+            } catch (SQLException e) {
+                System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " METHOD: removeMenu() MESSAGE-FINALLY: " + e);
+            }
+        }
+
+        return response;
+    }
+
+    @PUT
+    @Path("update")
+    @Produces(MediaType.TEXT_PLAIN)
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response updateMenu(String json) {
+        Response response = null;
+
+        MySQLDriver driver = new MySQLDriver();
+        Connection connection = driver.getConnection();
+
+        try {
+            connection.setAutoCommit(false);
+
+            Menu menu = JsonUtil.getFromJson(json, new TypeReference<Menu>() {
+            });
+
+            if (!this.getMenuController().existsMenu(connection, Integer.valueOf(String.valueOf(menu.getID_MENU())))) {
+                response = Response.status(Response.Status.NOT_FOUND)
+                        .entity("The menu with the ID: " + menu.getID_MENU() + " was not found in the database.")
+                        .build();
+            } else {
+                response = Response.ok(
+                        this.getMenuController().updateMenu(connection, menu), MediaType.TEXT_PLAIN
+                ).build();
+
+                connection.commit();
+                connection.setAutoCommit(true);
+            }
+        } catch(Exception e) {
+            try {
+                if (connection != null) {
+                    connection.rollback();
+                    connection.setAutoCommit(true);
+                }
+
+                response = Response.status(Status.NOT_FOUND)
+                        .entity("Can't insert data due to connection errors!")
+                        .build();
+
+                System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " METHOD: updateMenu() MESSAGE: " + e);
+            } catch(SQLException e1) {
+                System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " METHOD: updateMenu() MESSAGE-ROLLBACK: " + e1);
+            }
+        } finally {
+            try {
+                connection.close();
+            } catch (SQLException e) {
+                System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " METHOD: updateMenu() MESSAGE-FINALLY: " + e);
             }
         }
 

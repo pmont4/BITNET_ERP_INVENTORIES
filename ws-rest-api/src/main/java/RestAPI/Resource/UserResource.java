@@ -114,12 +114,18 @@ public class UserResource implements Serializable {
             User user = JsonUtil.getFromJson(json, new TypeReference<User>() { 
             });
 
-            response = Response.ok(
-                this.getUserController().addUser(connection, user), MediaType.TEXT_PLAIN
-            ).build();
+            if (this.getUserController().existsUser(connection, Integer.valueOf(String.valueOf(user.getID_USER())))) {
+                response = Response.status(Response.Status.NOT_FOUND)
+                        .entity("The user with the ID: " + user.getID_USER() + " already exists in the database.")
+                        .build();
+            } else {
+                response = Response.ok(
+                        this.getUserController().addUser(connection, user), MediaType.TEXT_PLAIN
+                ).build();
 
-            connection.commit();
-            connection.setAutoCommit(true);
+                connection.commit();
+                connection.setAutoCommit(true);
+            }
         } catch(Exception e) {
             try {
                 if (connection != null) {
@@ -158,12 +164,18 @@ public class UserResource implements Serializable {
         try {
             connection.setAutoCommit(false);
 
-            response = Response.ok(
-                this.getUserController().removeUser(connection, id), MediaType.TEXT_PLAIN
-            ).build();
+            if (!this.getUserController().existsUser(connection, id)) {
+                response = Response.status(Response.Status.NOT_FOUND)
+                        .entity("The user with the ID: " + id + " was not found in the database.")
+                        .build();
+            } else {
+                response = Response.ok(
+                        this.getUserController().removeUser(connection, id), MediaType.TEXT_PLAIN
+                ).build();
 
-            connection.commit();
-            connection.setAutoCommit(true);
+                connection.commit();
+                connection.setAutoCommit(true);
+            }
         } catch(Exception e) {
             try {
                 if (connection != null) {
@@ -206,12 +218,18 @@ public class UserResource implements Serializable {
             User user = JsonUtil.getFromJson(json, new TypeReference<User>() { 
             });
 
-            response = Response.ok(
-                this.getUserController().updateUser(connection, user), MediaType.TEXT_PLAIN
-            ).build();
+            if (!this.getUserController().existsUser(connection, Integer.valueOf(String.valueOf(user.getID_USER())))) {
+                response = Response.status(Response.Status.NOT_FOUND)
+                        .entity("The user with the ID: " + user.getID_USER() + " was not found in the database.")
+                        .build();
+            } else {
+                response = Response.ok(
+                        this.getUserController().updateUser(connection, user), MediaType.TEXT_PLAIN
+                ).build();
 
-            connection.commit();
-            connection.setAutoCommit(true);
+                connection.commit();
+                connection.setAutoCommit(true);
+            }
         } catch(Exception e) {
             try {
                 if (connection != null) {

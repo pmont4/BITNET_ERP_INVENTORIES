@@ -151,7 +151,7 @@ public class UserController implements Serializable {
 
             stmt2.executeUpdate();
             stmt2.close();
-            result = "User with the ID: " + id_user + " correctly inserted in the table user.";
+            result = "The user with the name: " + user.getUSERNAME() + " and the ID: " + id_user + " has been correctly created to the database.";
         } catch (Exception e) {
             System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " METHOD: addUser() MESSAGE: " + e);
         }
@@ -208,6 +208,10 @@ public class UserController implements Serializable {
         }
 
         return result;
+    }
+
+    public boolean existsUser(Connection connection, Integer id) {
+        return this.getUser(connection, id).isPresent();
     }
 
 }

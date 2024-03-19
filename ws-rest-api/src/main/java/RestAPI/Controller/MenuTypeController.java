@@ -84,6 +84,8 @@ public class MenuTypeController  implements Serializable {
             stmt2.setString(2, menuType.getNAME());
             stmt2.executeUpdate();
             stmt2.close();
+
+            result = "The menu type with the name: " + menuType.getNAME() + " and the ID: " + menuType.getID_MENU_TYPE() + " has been correctly created to the database.";
         } catch (Exception e) {
             System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " METHOD: addMenuType() MESSAGE: " + e);
         }
@@ -132,10 +134,36 @@ public class MenuTypeController  implements Serializable {
                     }
                 });
             }
+
+            result = "The menu type with the ID: " + id + " has been removed from the database.";
         } catch (Exception e) {
             System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " METHOD: removeMenuType() MESSAGE: " + e);
         }
 
         return result;
     }
+
+    public String updateMenuType(Connection connection, MenuType menuType) {
+        String result = "";
+
+        try {
+            String sql = "UPDATE MENU_TYPE SET NAME=? WHERE ID_MENU_TYPE=?";
+            PreparedStatement stmt = connection.prepareStatement(sql);
+            stmt.setString(1, menuType.getNAME());
+            stmt.setLong(2, menuType.getID_MENU_TYPE());
+            stmt.executeUpdate();
+            stmt.close();
+
+            result = "The menu type with the ID: " + menuType.getID_MENU_TYPE() + " has been modified.";
+        } catch (Exception e) {
+            System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " METHOD: updateMenuType() MESSAGE: " + e);
+        }
+
+        return result;
+    }
+
+    public boolean existsMenuType(Connection connection, Integer id) {
+        return this.getMenuType(connection, id).isPresent();
+    }
+
 }

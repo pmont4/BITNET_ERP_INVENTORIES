@@ -186,4 +186,8 @@ public class RoleController implements Serializable {
 
         return result;
     }
+
+    public boolean existsRole(Connection connection, Integer id) {
+        return this.getRole(connection, id).isPresent();
+    }
 }

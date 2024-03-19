@@ -104,6 +104,8 @@ public class MenuController implements Serializable {
             stmt2.setLong(4, menu.getID_PARENT_MENU());
             stmt2.executeUpdate();
             stmt2.close();
+
+            result = "The menu with the name: " + menu.getNAME() + " and the ID: " + menu.getID_MENU() + " has been correctly created in the database.";
         } catch (Exception e) {
             System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " METHOD: addMenu() MESSAGE: " + e);
         }
@@ -111,4 +113,52 @@ public class MenuController implements Serializable {
         return result;
     }
 
+    public String removeMenu(Connection connection, Integer id) {
+        String result = "";
+
+        try {
+            String sql = "DELETE FROM MENU_ROLE WHERE ID_MENU=?";
+            PreparedStatement stmt = connection.prepareStatement(sql);
+            stmt.setLong(1, Long.valueOf(id));
+            stmt.executeUpdate();
+
+            sql = "DELETE FROM MENU WHERE ID_MENU=?";
+            stmt = connection.prepareStatement(sql);
+            stmt.setLong(1, Long.valueOf(id));
+            stmt.executeUpdate();
+
+            stmt.close();
+
+            result = "The menu with the ID: " + id + " has been removed from the database.";
+        } catch (Exception e) {
+            System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " METHOD: removeMenu() MESSAGE: " + e);
+        }
+
+        return result;
+    }
+
+    public String updateMenu(Connection connection, Menu menu) {
+        String result = "";
+
+        try {
+            String sql = "UPDATE MENU SET NAME=?, ID_MENU_TYPE=?, ID_PARENT_MENU=? WHERE ID_MENU=?";
+            PreparedStatement stmt = connection.prepareStatement(sql);
+            stmt.setString(1, menu.getNAME());
+            stmt.setLong(2, menu.getMENU_TYPE().getID_MENU_TYPE());
+            stmt.setLong(3, menu.getID_PARENT_MENU());
+            stmt.setLong(4, menu.getID_MENU());
+            stmt.executeUpdate();
+            stmt.close();
+
+            result = "The menu with the ID: " + menu.getID_MENU() + " has been correctly modified.";
+        } catch (Exception e) {
+            System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " METHOD: updateMenu() MESSAGE: " + e);
+        }
+
+        return result;
+    }
+
+    public boolean existsMenu(Connection connection, Integer id) {
+        return this.getMenu(connection, id).isPresent();
+    }
 }

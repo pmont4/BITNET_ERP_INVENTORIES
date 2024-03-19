@@ -35,13 +35,13 @@ public class RoleResource implements Serializable {
 
         try {
             response = Response.ok(
-                this.getRoleController().getAllRoles(connection), 
-                MediaType.APPLICATION_JSON
+                    this.getRoleController().getAllRoles(connection),
+                    MediaType.APPLICATION_JSON
             ).build();
-        } catch(Exception e) {
+        } catch (Exception e) {
             response = Response.status(Status.NOT_FOUND)
-                .entity("Can't bring data due to connection errors!")
-                .build();
+                    .entity("Can't bring data due to connection errors!")
+                    .build();
 
             System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " METHOD: getAllRoles() MESSAGE: " + e);
         } finally {
@@ -66,13 +66,13 @@ public class RoleResource implements Serializable {
 
         try {
             response = Response.ok(
-                this.getRoleController().getAllRoleMenu(connection, id), 
-                MediaType.APPLICATION_JSON
+                    this.getRoleController().getAllRoleMenu(connection, id),
+                    MediaType.APPLICATION_JSON
             ).build();
-        } catch(Exception e) {
+        } catch (Exception e) {
             response = Response.status(Status.NOT_FOUND)
-                .entity("Can't bring data due to connection errors!")
-                .build();
+                    .entity("Can't bring data due to connection errors!")
+                    .build();
 
             System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " METHOD: getAllowedMenusForRole() MESSAGE: " + e);
         } finally {
@@ -87,7 +87,7 @@ public class RoleResource implements Serializable {
     }
 
     @GET
-    @Path("/{id}")
+    @Path("{id}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getRole(@PathParam("id") Integer id) {
         Response response;
@@ -99,16 +99,16 @@ public class RoleResource implements Serializable {
             Optional<Role> role = this.getRoleController().getRole(connection, id);
             if (role.isPresent()) {
                 response = Response.ok(
-                    role.get(), MediaType.APPLICATION_JSON
+                        role.get(), MediaType.APPLICATION_JSON
                 ).build();
             } else {
                 response = Response.status(Status.NOT_FOUND)
-                            .entity("The role with the ID: " + id + " wasn´t found int the database").build();
+                        .entity("The role with the ID: " + id + " wasn´t found int the database").build();
             }
-        } catch(Exception e) {
+        } catch (Exception e) {
             response = Response.status(Status.NOT_FOUND)
-                .entity("Can't bring data due to connection errors!")
-                .build();
+                    .entity("Can't bring data due to connection errors!")
+                    .build();
 
             System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " METHOD: getRole() MESSAGE: " + e);
         } finally {
@@ -125,7 +125,7 @@ public class RoleResource implements Serializable {
     @POST
     @Path("add")
     @Produces(MediaType.TEXT_PLAIN)
-    @Consumes(MediaType.APPLICATION_JSON) 
+    @Consumes(MediaType.APPLICATION_JSON)
     public Response addRole(String json) {
         Response response = null;
 
@@ -135,28 +135,34 @@ public class RoleResource implements Serializable {
         try {
             connection.setAutoCommit(false);
 
-            Role role = JsonUtil.getFromJson(json, new TypeReference<Role>() { 
+            Role role = JsonUtil.getFromJson(json, new TypeReference<Role>() {
             });
 
-            response = Response.ok(
-                this.getRoleController().addRole(connection, role), MediaType.TEXT_PLAIN
-            ).build();
+            if (this.getRoleController().existsRole(connection, Integer.valueOf(String.valueOf(role.getID_ROLE())))) {
+                response = Response.status(Response.Status.NOT_FOUND)
+                        .entity("The role with the ID: " + role.getID_ROLE() +  " already exists in the database.")
+                        .build();
+            } else {
+                response = Response.ok(
+                        this.getRoleController().addRole(connection, role), MediaType.TEXT_PLAIN
+                ).build();
 
-            connection.commit();
-            connection.setAutoCommit(true);
-        } catch(Exception e) {
+                connection.commit();
+                connection.setAutoCommit(true);
+            }
+        } catch (Exception e) {
             try {
                 if (connection != null) {
                     connection.rollback();
                     connection.setAutoCommit(true);
                 }
-    
+
                 response = Response.status(Status.NOT_FOUND)
-                    .entity("Can't insert data due to connection errors!")
-                    .build();
-    
+                        .entity("Can't insert data due to connection errors!")
+                        .build();
+
                 System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " METHOD: addRole() MESSAGE: " + e);
-            } catch(SQLException e1) {
+            } catch (SQLException e1) {
                 System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " METHOD: addRole() MESSAGE-ROLLBACK: " + e1);
             }
         } finally {
@@ -182,25 +188,31 @@ public class RoleResource implements Serializable {
         try {
             connection.setAutoCommit(false);
 
-            response = Response.ok(
-                this.getRoleController().removeRole(connection, id), MediaType.TEXT_PLAIN
-            ).build();
+            if (!this.getRoleController().existsRole(connection, id)) {
+                response = Response.status(Response.Status.NOT_FOUND)
+                        .entity("The role with the ID: " + id + " was not found in the database.")
+                        .build();
+            } else {
+                response = Response.ok(
+                        this.getRoleController().removeRole(connection, id), MediaType.TEXT_PLAIN
+                ).build();
 
-            connection.commit();
-            connection.setAutoCommit(true);
-        } catch(Exception e) {
+                connection.commit();
+                connection.setAutoCommit(true);
+            }
+        } catch (Exception e) {
             try {
                 if (connection != null) {
                     connection.rollback();
                     connection.setAutoCommit(true);
                 }
-    
+
                 response = Response.status(Status.NOT_FOUND)
-                    .entity("Can't delete data due to connection errors!")
-                    .build();
-    
+                        .entity("Can't delete data due to connection errors!")
+                        .build();
+
                 System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " METHOD: removeRole() MESSAGE: " + e);
-            } catch(SQLException e1) {
+            } catch (SQLException e1) {
                 System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " METHOD: removeRole() MESSAGE-ROLLBACK: " + e1);
             }
         } finally {
@@ -230,13 +242,19 @@ public class RoleResource implements Serializable {
             Role role = JsonUtil.getFromJson(json, new TypeReference<Role>() {
             });
 
-            response = Response.ok(
-                    this.getRoleController().updateRole(connection, role), MediaType.TEXT_PLAIN
-            ).build();
+            if (!this.getRoleController().existsRole(connection, Integer.valueOf(String.valueOf(role.getID_ROLE())))) {
+                response = Response.status(Response.Status.NOT_FOUND)
+                        .entity("The role with the ID: " + role.getID_ROLE() + " was not found in the database.")
+                        .build();
+            } else {
+                response = Response.ok(
+                        this.getRoleController().updateRole(connection, role), MediaType.TEXT_PLAIN
+                ).build();
 
-            connection.commit();
-            connection.setAutoCommit(true);
-        } catch(Exception e) {
+                connection.commit();
+                connection.setAutoCommit(true);
+            }
+        } catch (Exception e) {
             try {
                 if (connection != null) {
                     connection.rollback();
@@ -248,7 +266,7 @@ public class RoleResource implements Serializable {
                         .build();
 
                 System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " METHOD: updateRole() MESSAGE: " + e);
-            } catch(SQLException e1) {
+            } catch (SQLException e1) {
                 System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " METHOD: updateRole() MESSAGE-ROLLBACK: " + e1);
             }
         } finally {

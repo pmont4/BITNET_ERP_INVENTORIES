@@ -17,7 +17,7 @@ public class EventType implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private Integer ID_EVENT_TYPE;
+    private Long ID_EVENT_TYPE;
     private String NAME;
 
 }

@@ -6,6 +6,7 @@ import java.sql.SQLException;
 import java.util.Optional;
 
 import RestAPI.Controller.MenuTypeController;
+import RestAPI.Entity.Role;
 import RestAPI.Entity.Types.MenuType;
 import RestAPI.Util.JsonUtil;
 import RestAPI.Util.MySQLDriver;
@@ -106,12 +107,18 @@ public class MenuTypeResource implements Serializable {
             MenuType menuType = JsonUtil.getFromJson(json, new TypeReference<MenuType>() {
             });
 
-            response = Response.ok(
-                    this.getMenuTypeController().addMenuType(connection, menuType), MediaType.TEXT_PLAIN
-            ).build();
+            if (this.getMenuTypeController().existsMenuType(connection, Integer.valueOf(String.valueOf(menuType.getID_MENU_TYPE())))) {
+                response = Response.status(Response.Status.NOT_FOUND)
+                        .entity("The menu with the ID: " + menuType.getID_MENU_TYPE() + " already exists in the database.")
+                        .build();
+            } else {
+                response = Response.ok(
+                        this.getMenuTypeController().addMenuType(connection, menuType), MediaType.TEXT_PLAIN
+                ).build();
 
-            connection.commit();
-            connection.setAutoCommit(true);
+                connection.commit();
+                connection.setAutoCommit(true);
+            }
         } catch(Exception e) {
             try {
                 if (connection != null) {
@@ -150,12 +157,18 @@ public class MenuTypeResource implements Serializable {
         try {
             connection.setAutoCommit(false);
 
-            response = Response.ok(
-                    this.getMenuTypeController().removeMenuType(connection, id), MediaType.TEXT_PLAIN
-            ).build();
+            if (!this.getMenuTypeController().existsMenuType(connection, id)) {
+                response = Response.status(Response.Status.NOT_FOUND)
+                        .entity("The menu with the ID: " + id + " was not found in the database.")
+                        .build();
+            } else {
+                response = Response.ok(
+                        this.getMenuTypeController().removeMenuType(connection, id), MediaType.TEXT_PLAIN
+                ).build();
 
-            connection.commit();
-            connection.setAutoCommit(true);
+                connection.commit();
+                connection.setAutoCommit(true);
+            }
         } catch(Exception e) {
             try {
                 if (connection != null) {
@@ -182,6 +195,59 @@ public class MenuTypeResource implements Serializable {
         return response;
     }
 
+    @PUT
+    @Path("update")
+    @Produces(MediaType.TEXT_PLAIN)
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response updateMediaType(String json) {
+        Response response = null;
+
+        MySQLDriver driver = new MySQLDriver();
+        Connection connection = driver.getConnection();
+
+        try {
+            connection.setAutoCommit(false);
+
+            MenuType menuType = JsonUtil.getFromJson(json, new TypeReference<MenuType>() {
+            });
+
+            if (!this.getMenuTypeController().existsMenuType(connection, Integer.valueOf(String.valueOf(menuType.getID_MENU_TYPE())))) {
+                response = Response.status(Response.Status.NOT_FOUND)
+                        .entity("The menu with the ID: " + menuType.getID_MENU_TYPE() + " was not found in the database.")
+                        .build();
+            } else {
+                response = Response.ok(
+                        this.getMenuTypeController().updateMenuType(connection, menuType), MediaType.TEXT_PLAIN
+                ).build();
+
+                connection.commit();
+                connection.setAutoCommit(true);
+            }
+        } catch(Exception e) {
+            try {
+                if (connection != null) {
+                    connection.rollback();
+                    connection.setAutoCommit(true);
+                }
+
+                response = Response.status(Status.NOT_FOUND)
+                        .entity("Can't insert data due to connection errors!")
+                        .build();
+
+                System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " METHOD: updateMediaType() MESSAGE: " + e);
+            } catch(SQLException e1) {
+                System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " METHOD: updateMediaType() MESSAGE-ROLLBACK: " + e1);
+            }
+        } finally {
+            try {
+                connection.close();
+            } catch (SQLException e) {
+                System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " METHOD: updateMediaType() MESSAGE-FINALLY: " + e);
+            }
+        }
+
+        return response;
+    }
 
     private MenuTypeController getMenuTypeController() {
         if (menuTypeController == null) {

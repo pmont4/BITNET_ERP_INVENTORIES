@@ -19,9 +19,11 @@ public class Event implements Serializable {
 
     private static final long serialVersionUID = 1L;
     
-    private Integer ID_EVENT;
+    private Long ID_EVENT;
     private EventType EVENT_TYPE;
     private User USER;
-    private Date LOG_DATE;
+    private String LOG_DATE;
+    private String TIME;
+    private String DESCRIPTION;
 
 }
