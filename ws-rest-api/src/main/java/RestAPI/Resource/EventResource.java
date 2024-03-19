@@ -103,10 +103,10 @@ public class EventResource implements Serializable {
         try {
             connection.setAutoCommit(false);
 
-            Event event= JsonUtil.getFromJson(json, new TypeReference<Event>() {
+            Event event = JsonUtil.getFromJson(json, new TypeReference<Event>() {
             });
 
-            if (!Objects.isNull(event)) {
+            if (this.getEventController().existsEvent(connection, Integer.valueOf(String.valueOf(event.getID_EVENT())))) {
                 response = Response.status(Response.Status.NOT_FOUND)
                         .entity("The event with the ID: " + event.getID_EVENT() + " already exists in the database.")
                         .build();
