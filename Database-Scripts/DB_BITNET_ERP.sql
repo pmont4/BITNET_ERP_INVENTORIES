@@ -172,7 +172,7 @@ CREATE TRIGGER IF NOT EXISTS CHECK_PASSWORD_USER
             LENGTH(NEW.PASSWORD) < 8 OR NOT NEW.PASSWORD REGEXP '[0-9]') THEN
 
             SIGNAL  SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'The providen password is invalid.';
+            SET MESSAGE_TEXT = 'The providen password is not valid.';
 
         END IF;
 
