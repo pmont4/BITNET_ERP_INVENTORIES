@@ -288,6 +288,50 @@ public class UserResource implements Serializable {
         return response;
     }
 
+    @PUT
+    @Path("update/password/{id}/{newPass}")
+    @Produces(MediaType.TEXT_PLAIN)
+    public Response updatePassword(@PathParam("id") Integer id,
+                                   @PathParam("newPass") String newPass) {
+        Response response = null;
+
+        MySQLDriver driver = new MySQLDriver();
+        Connection connection = driver.getConnection();
+
+        try {
+            connection.setAutoCommit(false);
+
+            response = Response.ok(
+                    this.getUserController().updatePass(connection, id, newPass), MediaType.TEXT_PLAIN
+            ).build();
+
+            connection.setAutoCommit(true);
+        } catch (Exception e) {
+            try {
+                if (connection != null) {
+                    connection.rollback();
+                    connection.setAutoCommit(true);
+                }
+
+                response = Response.status(Status.NOT_FOUND)
+                        .entity("Can't update data due to connection errors!")
+                        .build();
+
+                System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " METHOD: updatePassword() MESSAGE: " + e);
+            } catch (SQLException e1) {
+                System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " METHOD: updatePassword() MESSAGE-ROLLBACK: " + e1);
+            }
+        } finally {
+            try {
+                connection.close();
+            } catch (SQLException e) {
+                System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " METHOD: updatePassword() MESSAGE-FINALLY: " + e);
+            }
+        }
+
+        return response;
+    }
+
     private UserController getUserController() {
         if (userController == null) {
             userController = new UserController();

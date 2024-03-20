@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import RestAPI.Entity.Role;
 import RestAPI.Entity.User;
@@ -182,30 +184,94 @@ public class UserController implements Serializable {
         String result = null;
 
         try {
-            String sql = "UPDATE USER U SET U.LOGIN_NAME = ?, U.PASSWORD = ?, U.USERNAME = ?, U.EMAIL = ?, U.ID_ROLE = ?, U.STATUS = ? WHERE U.ID_USER = ?";
+            String sql = "UPDATE USER U SET U.LOGIN_NAME = ?, U.USERNAME = ?, U.EMAIL = ?, U.ID_ROLE = ?, U.STATUS = ? WHERE U.ID_USER = ?";
             PreparedStatement stmt = connection.prepareStatement(sql);
             stmt.setString(1, user.getLOGIN_NAME());
-            stmt.setString(2, user.getPASSWORD());
-            stmt.setString(3, user.getUSERNAME());
-            stmt.setString(4, user.getEMAIL());
-            stmt.setLong(5, user.getROLE().getID_ROLE());
+            stmt.setString(2, user.getUSERNAME());
+            stmt.setString(3, user.getEMAIL());
+            stmt.setLong(4, user.getROLE().getID_ROLE());
 
             switch (user.getSTATUS()) {
                 case "ACTIVE":
-                    stmt.setShort(6, (short) 1);
+                    stmt.setShort(5, (short) 1);
                     break;
                 case "NOT ACTIVE":
-                    stmt.setShort(6, (short) 0);
+                    stmt.setShort(5, (short) 0);
                     break;
             }
 
-            stmt.setLong(7, user.getID_USER());
+            stmt.setLong(6, user.getID_USER());
 
             stmt.executeUpdate();
             stmt.close();
             result = "The user with the ID: " + user.getID_USER() + " has been modified.";
         } catch (Exception e) {
             System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " METHOD: updateUser() MESSAGE: " + e);
+        }
+
+        return result;
+    }
+
+    public String updatePass(Connection connection, Integer id, String newPass) {
+        String result = "";
+
+        try {
+            boolean canUpdate;
+
+            String sql = "SELECT U.HAS_TO_UPDATE_PASS FROM USER U WHERE U.ID_USER=?";
+            PreparedStatement stmt = connection.prepareStatement(sql);
+            stmt.setLong(1, Long.valueOf(id));
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                short value = rs.getShort(1);
+                canUpdate = value == (short) 1;
+                if (!canUpdate) {
+                    result = "Cannot update the password for user with the ID: " + id + " because it's not allowed to do it!";
+                } else {
+                    Pattern checkNums = Pattern.compile("([0-9])");
+                    Pattern checkCapitalLetters = Pattern.compile("([A-Z])");
+
+                    Matcher matchNums = checkNums.matcher(newPass);
+                    Matcher matchCapitalLetters = checkCapitalLetters.matcher(newPass);
+
+                    boolean pass_equal_to_old = false;
+
+                    String check_equal_sql = "SELECT U.PASSWORD FROM USER U WHERE U.ID_USER=?";
+                    PreparedStatement stmt_check_equal = connection.prepareStatement(check_equal_sql);
+                    stmt_check_equal.setLong(1, Long.valueOf(id));
+                    ResultSet rs_check = stmt_check_equal.executeQuery();
+                    if (rs_check.next()) {
+                        String old_pass = DigestUtils.sha256Hex(rs_check.getString(1));
+                        pass_equal_to_old = DigestUtils.sha256Hex(newPass).equals(old_pass);
+                    }
+
+                    if (newPass.length() < 8) {
+                        result = "Cannot update the password for user with the ID: " + id + " because it's lower than 8 characters!";
+                    } else if (!matchNums.find()) {
+                        result = "Cannot update the password for user with the ID: " + id + " because it does not contains any numbers!";
+                    } else if (!matchCapitalLetters.find()) {
+                        result = "Cannot update the password for user with the ID: " + id + " because it does not contains any capital letter!";
+                    } else if (pass_equal_to_old) {
+                        result = "Cannot update the password for user with the ID: " + id + " because the new password it's same one than the older one";
+                    } else {
+                        String sql_update = "UPDATE USER U SET U.PASSWORD=? WHERE U.ID_USER=?";
+                        PreparedStatement stmt_update = connection.prepareStatement(sql_update);
+                        stmt_update.setString(1, DigestUtils.sha256Hex(newPass));
+                        stmt_update.setLong(2, Long.valueOf(id));
+                        stmt_update.executeUpdate();
+                        stmt_update.close();
+
+                        result = "The password for the user with the ID: " + id + " has been modified.";
+                    }
+                }
+            } else {
+                result = "Cannot find the user with the ID: " + id + ".";
+            }
+
+            rs.close();
+            stmt.close();
+        } catch (Exception e) {
+            System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " METHOD: updatePass() MESSAGE: " + e);
         }
 
         return result;
