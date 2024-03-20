@@ -254,10 +254,11 @@ public class UserController implements Serializable {
                     } else if (pass_equal_to_old) {
                         result = "Cannot update the password for user with the ID: " + id + " because the new password it's same one than the older one";
                     } else {
-                        String sql_update = "UPDATE USER U SET U.PASSWORD=? WHERE U.ID_USER=?";
+                        String sql_update = "UPDATE USER U SET U.PASSWORD=?, U.HAS_TO_UPDATE_PASS = ? WHERE U.ID_USER=?";
                         PreparedStatement stmt_update = connection.prepareStatement(sql_update);
                         stmt_update.setString(1, DigestUtils.sha256Hex(newPass));
-                        stmt_update.setLong(2, Long.valueOf(id));
+                        stmt_update.setShort(2, (short) 0);
+                        stmt_update.setLong(3, Long.valueOf(id));
                         stmt_update.executeUpdate();
                         stmt_update.close();
 
