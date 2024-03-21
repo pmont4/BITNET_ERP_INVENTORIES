@@ -283,7 +283,7 @@ public class UserController implements Serializable {
 
         try {
             boolean needsToUpdate;
-            String needUpdateSQL = "SELECT U.HAS_TO_UPDATE_PASS FROM USER U WHERE U.LOGIN_NAME=?";
+            String needUpdateSQL = "SELECT U.HAS_TO_UPDATE_PASS, U.ID_USER FROM USER U WHERE U.LOGIN_NAME=?";
             PreparedStatement stmt = connection.prepareStatement(needUpdateSQL);
             stmt.setString(1, login_name);
             ResultSet rs = stmt.executeQuery();
@@ -292,7 +292,12 @@ public class UserController implements Serializable {
             } else {
                 needsToUpdate = rs.getShort(1) == (short) 1;
                 if (needsToUpdate) {
-                    result.put(405, "The user with the login name: " + login_name + " needs to update his password");
+                    String str = "The user with the login name: " +
+                            login_name +
+                            " and ID: " +
+                            rs.getLong(2) +
+                            ", needs to update his password.";
+                    result.put(405, str);
                 } else {
                     String user_info = "SELECT " +
                             "U.ID_USER, " +
