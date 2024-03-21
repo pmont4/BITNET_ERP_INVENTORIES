@@ -3,6 +3,8 @@ package RestAPI.Resource;
 import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -255,21 +257,25 @@ public class UserResource implements Serializable {
     @Produces({"application/json", "text/plain"})
     public Response authentication(@PathParam("login_name") String login_name,
                                    @PathParam("password") String password) {
-        Response response;
+        Response response = null;
 
         MySQLDriver driver = new MySQLDriver();
         Connection connection = driver.getConnection();
 
         try {
-            Optional<User> user = this.getUserController().authentication(connection, login_name, password);
-            if (user.isPresent()) {
-                response = Response.ok(
-                        user.get(), MediaType.APPLICATION_JSON
-                ).build();
-            } else {
-                response = Response.status(Status.NOT_FOUND).entity(
-                        "The username or the password are not correct."
-                ).build();
+            HashMap<Integer, Object> responseMap = this.getUserController().authentication(connection, login_name, password);
+            for (Map.Entry<Integer, Object> entry : responseMap.entrySet()) {
+                if (entry.getValue() instanceof User) {
+                    response = Response.status(Response.Status.fromStatusCode(entry.getKey()))
+                            .entity(entry.getValue())
+                            .type(MediaType.APPLICATION_JSON)
+                            .build();
+                } else {
+                    response = Response.status(Response.Status.fromStatusCode(entry.getKey()))
+                            .entity(entry.getValue())
+                            .type(MediaType.TEXT_PLAIN)
+                            .build();
+                }
             }
         } catch (Exception e) {
             response = Response.status(Status.NOT_FOUND)
@@ -301,9 +307,14 @@ public class UserResource implements Serializable {
         try {
             connection.setAutoCommit(false);
 
-            response = Response.ok(
-                    this.getUserController().updatePass(connection, id, newPass), MediaType.TEXT_PLAIN
-            ).build();
+            HashMap<Integer, String> responseMap = this.getUserController().updatePass(connection, id, newPass);
+            if (!responseMap.isEmpty()) {
+                for (Map.Entry<Integer, String> entry : responseMap.entrySet()) {
+                    response = Response.status(Response.Status.fromStatusCode(entry.getKey()))
+                            .entity(entry.getValue())
+                            .build();
+                }
+            }
 
             connection.setAutoCommit(true);
         } catch (Exception e) {

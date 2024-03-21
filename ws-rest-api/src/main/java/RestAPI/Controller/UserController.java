@@ -4,10 +4,7 @@ import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -212,8 +209,8 @@ public class UserController implements Serializable {
         return result;
     }
 
-    public String updatePass(Connection connection, Integer id, String newPass) {
-        String result = "";
+    public HashMap<Integer, String> updatePass(Connection connection, Integer id, String newPass) {
+        HashMap<Integer, String> result = new HashMap<>();
 
         try {
             boolean canUpdate;
@@ -226,7 +223,7 @@ public class UserController implements Serializable {
                 short value = rs.getShort(1);
                 canUpdate = value == (short) 1;
                 if (!canUpdate) {
-                    result = "Cannot update the password for user with the ID: " + id + " because it's not allowed to do it!";
+                    result.put(405, "Cannot update the password for user with the ID: " + id + " because it's not allowed to do it!");
                 } else {
                     Pattern checkNums = Pattern.compile("([0-9])");
                     Pattern checkCapitalLetters = Pattern.compile("([A-Z])");
@@ -246,13 +243,13 @@ public class UserController implements Serializable {
                     }
 
                     if (newPass.length() < 8) {
-                        result = "Cannot update the password for user with the ID: " + id + " because it's lower than 8 characters!";
+                        result.put(400, "Cannot update the password for user with the ID: " + id + " because it's lower than 8 characters!");
                     } else if (!matchNums.find()) {
-                        result = "Cannot update the password for user with the ID: " + id + " because it does not contains any numbers!";
+                        result.put(400, "Cannot update the password for user with the ID: " + id + " because it does not contains any numbers!");
                     } else if (!matchCapitalLetters.find()) {
-                        result = "Cannot update the password for user with the ID: " + id + " because it does not contains any capital letter!";
+                        result.put(400, "Cannot update the password for user with the ID: " + id + " because it does not contains any capital letter!");
                     } else if (pass_equal_to_old) {
-                        result = "Cannot update the password for user with the ID: " + id + " because the new password it's same one than the older one";
+                        result.put(400, "Cannot update the password for user with the ID: " + id + " because the new password it's same one than the older one");
                     } else {
                         String sql_update = "UPDATE USER U SET U.PASSWORD=?, U.HAS_TO_UPDATE_PASS = ? WHERE U.ID_USER=?";
                         PreparedStatement stmt_update = connection.prepareStatement(sql_update);
@@ -262,68 +259,88 @@ public class UserController implements Serializable {
                         stmt_update.executeUpdate();
                         stmt_update.close();
 
-                        result = "The password for the user with the ID: " + id + " has been modified.";
+                        result.put(200, "The password for the user with the ID: " + id + " has been modified.");
                     }
                 }
             } else {
-                result = "Cannot find the user with the ID: " + id + ".";
+                result.put(404, "Cannot find the user with the ID: " + id + ".");
             }
 
             rs.close();
             stmt.close();
         } catch (Exception e) {
+            result.put(500, "Some errors detected! please check console log!");
             System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " METHOD: updatePass() MESSAGE: " + e);
         }
 
         return result;
     }
 
-    public Optional<User> authentication(Connection connection, String login_name, String password) {
-        Optional<User> opt = Optional.empty();
+    public HashMap<Integer, Object> authentication(Connection connection, String login_name, String password) {
+        HashMap<Integer, Object> result = new HashMap<>();
 
         RoleController roleController = new RoleController();
 
         try {
-            String sql = "SELECT " +
-                    "U.ID_USER, " +
-                    "U.LOGIN_NAME, " +
-                    "REPEAT('*', 8), " +
-                    "U.USERNAME, " +
-                    "U.EMAIL, " +
-                    "U.ID_ROLE, " +
-                    "CASE " +
-                    "WHEN U.STATUS = 1 THEN 'ACTIVE'" +
-                    "ELSE 'NOT ACTIVE'" +
-                    "END " +
-                    "FROM USER U " +
-                    "WHERE U.LOGIN_NAME = ? AND U.PASSWORD = ?";
-            PreparedStatement stmt = connection.prepareStatement(sql);
+            boolean needsToUpdate;
+            String needUpdateSQL = "SELECT U.HAS_TO_UPDATE_PASS FROM USER U WHERE U.LOGIN_NAME=?";
+            PreparedStatement stmt = connection.prepareStatement(needUpdateSQL);
             stmt.setString(1, login_name);
-            stmt.setString(2, DigestUtils.sha256Hex(password));
             ResultSet rs = stmt.executeQuery();
+            if (!rs.next()) {
+                result.put(404, "Cannot find the user with the login name: " + login_name);
+            } else {
+                needsToUpdate = rs.getShort(1) == (short) 1;
+                if (needsToUpdate) {
+                    result.put(405, "The user with the login name: " + login_name + " needs to update his password");
+                } else {
+                    String user_info = "SELECT " +
+                            "U.ID_USER, " +
+                            "U.LOGIN_NAME, " +
+                            "REPEAT('*', 8), " +
+                            "U.USERNAME, " +
+                            "U.EMAIL, " +
+                            "U.ID_ROLE, " +
+                            "CASE " +
+                            "WHEN U.STATUS = 1 THEN 'ACTIVE'" +
+                            "ELSE 'NOT ACTIVE'" +
+                            "END " +
+                            "FROM USER U " +
+                            "WHERE U.LOGIN_NAME = ? AND U.PASSWORD = ?";
+                    PreparedStatement stmt2 = connection.prepareStatement(user_info);
+                    stmt2.setString(1, login_name);
+                    stmt2.setString(2, DigestUtils.sha256Hex(password));
+                    ResultSet rs2 = stmt2.executeQuery();
+                    if (rs2.next()) {
+                        User user = new User();
+                        user.setID_USER(rs2.getLong(1));
+                        user.setLOGIN_NAME(rs2.getString(2));
+                        user.setPASSWORD(rs2.getString(3));
+                        user.setUSERNAME(rs2.getString(4));
+                        user.setEMAIL(rs2.getString(5));
 
-            if (rs.next()) {
-                User user = new User();
-                user.setID_USER(rs.getLong(1));
-                user.setLOGIN_NAME(rs.getString(2));
-                user.setPASSWORD(rs.getString(3));
-                user.setUSERNAME(rs.getString(4));
-                user.setEMAIL(rs.getString(5));
+                        Long id_role = rs2.getLong(6);
+                        Optional<Role> role = roleController.getRole(connection, Integer.valueOf(String.valueOf(id_role)));
+                        role.ifPresent(user::setROLE);
+                        user.setSTATUS(rs2.getString(7));
+                        result.put(200, user);
+                    } else {
+                        result.put(404, "The provided username or password are not correct!");
+                    }
 
-                Long id_role = rs.getLong(6);
-                Optional<Role> role = roleController.getRole(connection, Integer.valueOf(String.valueOf(id_role)));
-                role.ifPresent(user::setROLE);
-                user.setSTATUS(rs.getString(7));
-                opt = Optional.of(user);
+                    rs2.close();
+                    stmt2.close();
+                }
+
+                rs.close();
+                stmt.close();
             }
-
-            rs.close();
-            stmt.close();
         } catch (Exception e) {
+            result.put(500, "Some errors detected! please check console log!");
             System.out.println("ERROR DETECTED IN CLASS: " + this.getClass().getName() + " METHOD: authentication() MESSAGE: " + e);
         }
 
-        return opt;
+        return result;
     }
 
     public boolean existsUser(Connection connection, Integer id) {
