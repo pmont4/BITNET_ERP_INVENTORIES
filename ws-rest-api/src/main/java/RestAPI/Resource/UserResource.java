@@ -7,20 +7,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import RestAPI.Util.email.SMTPMail;
 import com.fasterxml.jackson.core.type.TypeReference;
 
 import RestAPI.Controller.UserController;
 import RestAPI.Entity.User;
 import RestAPI.Util.JsonUtil;
 import RestAPI.Util.MySQLDriver;
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.DELETE;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.PUT;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.PathParam;
-import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
@@ -294,7 +288,7 @@ public class UserResource implements Serializable {
         return response;
     }
 
-    @PUT
+    @PATCH
     @Path("update/password/{id}/{newPass}")
     @Produces(MediaType.TEXT_PLAIN)
     public Response updatePassword(@PathParam("id") Integer id,
